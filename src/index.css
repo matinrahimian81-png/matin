@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
+  --color-dk-red: #EF2020;
+  --color-dk-gray: #F5F5F5;
+  --color-dk-dark: #3F4044;
+}
+
+body {
+  @apply bg-white text-dk-dark font-sans;
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+}
