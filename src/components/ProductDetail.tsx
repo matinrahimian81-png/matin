@@ -66,10 +66,10 @@ export default function ProductDetail({
   };
 
   return (
-    <div className="bg-[#F5F5F5] min-h-screen pb-20" dir="rtl">
+    <div className="bg-[#F5F5F5] min-h-screen pb-32" dir="rtl">
       {/* 1. Breadcrumb Navigation & Back Button */}
-      <div className="container mx-auto px-4 py-6 flex items-center justify-between">
-        <nav className="flex items-center gap-2 text-[13px] text-gray-500 font-bold overflow-x-auto no-scrollbar whitespace-nowrap">
+      <div className="container mx-auto px-4 py-4 md:py-6 flex items-center justify-between">
+        <nav className="hidden md:flex items-center gap-2 text-[13px] text-gray-500 font-bold overflow-x-auto no-scrollbar whitespace-nowrap">
           <button className="hover:text-gray-900 transition-colors" onClick={onBack}>خانه</button>
           <ChevronRight className="w-3.5 h-3.5 opacity-30" />
           <span className="text-gray-900 font-black truncate max-w-[200px]">{product.title}</span>
@@ -84,10 +84,10 @@ export default function ProductDetail({
         </button>
       </div>
 
-      <main className="container mx-auto px-4 flex flex-col lg:flex-row gap-8 items-start">
+      <main className="container mx-auto px-0 md:px-4 flex flex-col lg:flex-row gap-8 items-start">
         
-        {/* LEFT column (purchase box - sticky, 320px width) */}
-        <aside className="w-full lg:w-[320px] lg:sticky lg:top-32 order-2 lg:order-1 shrink-0">
+        {/* LEFT column (purchase box - Desktop only) */}
+        <aside className="hidden lg:block w-[320px] sticky top-32 order-2 lg:order-1 shrink-0">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -154,23 +154,30 @@ export default function ProductDetail({
         </aside>
 
         {/* RIGHT column (product info) */}
-        <div className="flex-grow space-y-8 order-1 lg:order-2">
-          <div className="bg-white rounded-2xl p-8 shadow-xl shadow-black/5 border border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-10">
+        <div className="w-full flex-grow space-y-4 md:space-y-8 order-1">
+          <div className="bg-white md:rounded-2xl p-4 md:p-8 shadow-xl shadow-black/5 border-b md:border border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
             
             {/* Product Image Gallery (md:col-span-5) */}
-            <div className="md:col-span-5 space-y-6">
-              <div className="relative group aspect-square bg-[#FBFBFB] rounded-2xl flex items-center justify-center p-10 overflow-hidden border border-gray-50">
+            <div className="md:col-span-5 space-y-4 md:space-y-6">
+              <div className="relative group aspect-square bg-white md:bg-[#FBFBFB] rounded-2xl flex items-center justify-center p-4 md:p-10 overflow-hidden md:border border-gray-50">
                  <motion.img 
                    key={selectedImg}
-                   initial={{ opacity: 0, scale: 0.9 }}
-                   animate={{ opacity: 1, scale: 1 }}
+                   initial={{ opacity: 0 }}
+                   animate={{ opacity: 1 }}
                    src={displayImages[selectedImg % displayImages.length]} 
-                   className="w-[400px] h-[400px] object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700 cursor-zoom-in"
+                   className="w-full h-full object-contain md:mix-blend-multiply group-hover:scale-110 transition-transform duration-700 cursor-zoom-in"
                    referrerPolicy="no-referrer"
                  />
+                 
+                 {/* Mobile Image Pagination dots */}
+                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 md:hidden">
+                    {displayImages.slice(0, 5).map((_, i) => (
+                      <div key={i} className={`h-1.5 rounded-full transition-all ${selectedImg === i ? 'w-4 bg-[#EF2020]' : 'w-1.5 bg-gray-200'}`} />
+                    ))}
+                 </div>
               </div>
               
-              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+              <div className="hidden md:flex gap-3 overflow-x-auto no-scrollbar pb-2">
                 {displayImages.slice(0, 5).map((img, i) => (
                   <button 
                     key={i}
@@ -184,44 +191,35 @@ export default function ProductDetail({
             </div>
 
             {/* Product Meta Info (md:col-span-7) */}
-            <div className="md:col-span-7 flex flex-col gap-6">
-              <div className="space-y-3">
-                <h1 className="text-[22px] font-black text-gray-900 leading-[1.6]">
+            <div className="md:col-span-7 flex flex-col gap-4 md:gap-6">
+              <div className="space-y-2 md:space-y-3">
+                <h1 className="text-lg md:text-[22px] font-black text-gray-900 leading-[1.6]">
                   {product.title}
                 </h1>
               </div>
 
-              <div className="flex items-center gap-4 border-y border-gray-50 py-4">
+              <div className="flex items-center gap-4 border-y border-gray-50 py-3 md:py-4">
                 <div className="flex items-center gap-1.5 px-1 py-0.5 rounded-lg">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   <span className="text-sm font-black text-gray-800">{product.rating}</span>
                   <span className="text-[10px] text-gray-400 font-bold">از ۵</span>
                 </div>
                 <div className="h-4 w-px bg-gray-100" />
-                <span className="text-[13px] text-gray-400 font-bold group cursor-pointer hover:text-blue-500">({product.reviewCount} نظر کاربران)</span>
-              </div>
-
-              {/* Key Specs Pills */}
-              <div className="flex flex-wrap gap-2">
-                {['۱۲ گیگابایت رم', '۲۵۶ گیگابایت حافظه', 'Dynamic AMOLED 2X', '۲۰۰ مگاپیکسل'].map(spec => (
-                  <div key={spec} className="bg-gray-50 px-4 py-2 border border-gray-100 rounded-lg text-[12px] font-bold text-gray-500">
-                    {spec}
-                  </div>
-                ))}
+                <span className="text-[12px] md:text-[13px] text-gray-400 font-bold group cursor-pointer hover:text-blue-500">({product.reviewCount} نظر کاربران)</span>
               </div>
 
               {/* Color Selector */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-black text-gray-800 flex items-center gap-2">
+              <div className="space-y-3 md:space-y-4">
+                <h4 className="text-xs md:text-sm font-black text-gray-800 flex items-center gap-2">
                   <span>انتخاب رنگ:</span>
-                  <span className="text-gray-400 text-xs font-black">{COLORS[selectedColor].name}</span>
+                  <span className="text-gray-400 text-[10px] md:text-xs font-black">{COLORS[selectedColor].name}</span>
                 </h4>
                 <div className="flex gap-4">
                   {COLORS.map((color, i) => (
                     <button
                       key={i}
                       onClick={() => setSelectedColor(i)}
-                      className={`w-10 h-10 rounded-full border-2 p-0.5 transition-all relative ${selectedColor === i ? 'border-[#EF2020] scale-110 bg-[#EF2020]/5' : 'border-transparent'}`}
+                      className={`w-8 h-8 md:w-10 md:h-10 rounded-full border-2 p-0.5 transition-all relative ${selectedColor === i ? 'border-[#EF2020] scale-110 bg-[#EF2020]/5' : 'border-transparent'}`}
                     >
                       <div className="w-full h-full rounded-full border border-black/10" style={{ backgroundColor: color.hex }} />
                       {selectedColor === i && (
@@ -234,18 +232,37 @@ export default function ProductDetail({
                 </div>
               </div>
 
-              <div className="mt-8 bg-blue-50 p-4 rounded-xl flex items-start gap-4">
-                 <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                 <p className="text-[11px] font-bold text-blue-800 leading-relaxed italic">
-                    گوشی موبایل Galaxy S24 Ultra ریجیستر شده است و به صورت پک اصلی به فروش می‌رسد. این محصول شامل ۱۸ ماه گارانتی شرکتی و تضمین اصالت کالاست.
+              <div className="mt-4 bg-blue-50 p-3 md:p-4 rounded-xl flex items-start gap-3 md:gap-4">
+                 <Info className="w-4 h-4 md:w-5 md:h-5 text-blue-500 shrink-0 mt-0.5" />
+                 <p className="text-[10px] md:text-[11px] font-bold text-blue-800 leading-relaxed italic">
+                    گوشی موبایل Galaxy S24 Ultra ریجیستر شده است و به صورت پک اصلی به فروش می‌رسد.
                  </p>
               </div>
             </div>
           </div>
 
-          {/* Tabs Section */}
-          <div className="bg-white rounded-2xl shadow-xl shadow-black/5 border border-gray-100 overflow-hidden">
-            <div className="flex items-center gap-1 border-b border-gray-50 px-4">
+          {/* Sticky Mobile Add to Cart Bar */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 z-[60] shadow-[0_-4px_20px_rgba(0,0,0,0.1)] flex items-center justify-between gap-4">
+            <button 
+              onClick={handleBuy}
+              className="flex-grow bg-[#EF2020] text-white h-12 rounded-xl font-black text-sm active:scale-95 transition-transform"
+            >
+              افزودن به سبد خرید
+            </button>
+            <div className="flex flex-col items-end shrink-0">
+               <div className="flex items-center gap-1 font-black text-lg text-gray-900">
+                  <span>{product.price.toLocaleString()}</span>
+                  <span className="text-[10px] font-bold opacity-50">تومان</span>
+               </div>
+               {product.discountPercentage && (
+                 <span className="text-[10px] text-gray-400 line-through">{(product.oldPrice || 0).toLocaleString()}</span>
+               )}
+            </div>
+          </div>
+
+          {/* Collapsible Technical Specs for Mobile, Tabs for Desktop */}
+          <div className="bg-white md:rounded-2xl shadow-xl shadow-black/5 border-y md:border border-gray-100 overflow-hidden">
+            <div className="hidden md:flex items-center gap-1 border-b border-gray-50 px-4">
                {TABS.map(tab => (
                  <button
                   key={tab.id}
@@ -263,54 +280,86 @@ export default function ProductDetail({
                ))}
             </div>
 
-            <div className="p-10 font-medium text-gray-600 leading-loose text-sm min-h-[300px]">
-               <AnimatePresence mode="wait">
-                 <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                 >
-                   {activeTab === 'specs' && (
-                     <div className="space-y-8">
-                       <h3 className="text-lg font-black text-gray-800">مشخصات فنی</h3>
-                       <div className="grid grid-cols-1 gap-1">
-                          {[
-                            { label: 'حافظه داخلی', value: '۲۵۶ گیگابایت' },
-                            { label: 'مقدار RAM', value: '۱۲ گیگابایت' },
-                            { label: 'رزولوشن عکس', value: '۲۰۰ مگاپیکسل' },
-                            { label: 'اندازه صفحه نمایش', value: '۶.۸ اینچ' },
-                            { label: 'تعداد سیم کارت', value: 'دو عدد' },
-                          ].map((item, i) => (
-                            <div key={i} className="flex border-b border-gray-50 py-4 group">
-                               <div className="w-1/3 text-gray-400 font-bold text-xs">{item.label}</div>
-                               <div className="flex-grow text-gray-800 font-black text-sm">{item.value}</div>
-                            </div>
-                          ))}
+            <div className="p-4 md:p-10 font-medium text-gray-600 leading-loose text-sm min-h-[200px]">
+               {/* Mobile Collapsible sections */}
+               <div className="md:hidden space-y-1">
+                  {TABS.map(tab => (
+                    <div key={tab.id} className="border-b border-gray-50 last:border-0">
+                       <button 
+                         onClick={() => setActiveTab(activeTab === tab.id ? '' : tab.id)}
+                         className="w-full flex items-center justify-between py-4 text-sm font-black text-gray-800"
+                       >
+                          <span>{tab.label}</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${activeTab === tab.id ? 'rotate-180' : ''}`} />
+                       </button>
+                       <AnimatePresence>
+                          {activeTab === tab.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden"
+                            >
+                               <div className="pb-4 text-xs font-bold text-gray-500 leading-relaxed">
+                                  {tab.id === 'specs' ? (
+                                     <div className="space-y-2">
+                                        {[
+                                          { label: 'حافظه داخلی', value: '۲۵۶ گیگابایت' },
+                                          { label: 'مقدار RAM', value: '۱۲ گیگابایت' },
+                                          { label: 'رزولوشن عکس', value: '۲۰۰ مگاپیکسل' },
+                                        ].map((item, i) => (
+                                          <div key={i} className="flex justify-between py-2 border-b border-gray-50/50">
+                                             <span className="opacity-60">{item.label}</span>
+                                             <span className="text-gray-800">{item.value}</span>
+                                          </div>
+                                        ))}
+                                     </div>
+                                  ) : (
+                                     <p>محتوای {tab.label} در این بخش نمایش داده می‌شود.</p>
+                                  )}
+                               </div>
+                            </motion.div>
+                          )}
+                       </AnimatePresence>
+                    </div>
+                  ))}
+               </div>
+
+               {/* Desktop Tab contents */}
+               <div className="hidden md:block">
+                 <AnimatePresence mode="wait">
+                   <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                   >
+                     {activeTab === 'specs' && (
+                       <div className="space-y-8">
+                         <h3 className="text-lg font-black text-gray-800">مشخصات فنی</h3>
+                         <div className="grid grid-cols-1 gap-1">
+                            {[
+                              { label: 'حافظه داخلی', value: '۲۵۶ گیگابایت' },
+                              { label: 'مقدار RAM', value: '۱۲ گیگابایت' },
+                              { label: 'رزولوشن عکس', value: '۲۰۰ مگاپیکسل' },
+                              { label: 'اندازه صفحه نمایش', value: '۶.۸ اینچ' },
+                              { label: 'تعداد سیم کارت', value: 'دو عدد' },
+                            ].map((item, i) => (
+                              <div key={i} className="flex border-b border-gray-50 py-4 group">
+                                 <div className="w-1/3 text-gray-400 font-bold text-xs">{item.label}</div>
+                                 <div className="flex-grow text-gray-800 font-black text-sm">{item.value}</div>
+                              </div>
+                            ))}
+                         </div>
                        </div>
-                     </div>
-                   )}
-                   {activeTab === 'review' && (
-                     <p>این بخش شامل نقد و بررسی تخصصی تیم دیجی‌کالا برای محصول Galaxy S24 Ultra است که تمامی جوانب سخت‌افزاری و نرم‌افزاری آن را مورد ارزیابی قرار داده‌ایم...</p>
-                   )}
-                   {activeTab === 'comments' && (
-                     <div className="space-y-6">
-                        <div className="flex items-center gap-4 text-yellow-500 mb-8">
-                           <Star className="w-8 h-8 fill-yellow-400" />
-                           <div className="flex flex-col">
-                              <span className="text-3xl font-black">۴.۵</span>
-                              <span className="text-xs text-gray-400 font-bold">از میان ۱۲۳۴ نظر ثبت شده</span>
-                           </div>
-                        </div>
-                        <p className="text-gray-400 italic">نظرات کاربران در حال بارگذاری است...</p>
-                     </div>
-                   )}
-                   {activeTab === 'qa' && (
-                     <p>اگر سوالی در مورد این محصول دارید، در این بخش می‌توانید مطرح کنید تا کارشناسان ما پاسخگو باشند.</p>
-                   )}
-                 </motion.div>
-               </AnimatePresence>
+                     )}
+                     {activeTab !== 'specs' && (
+                       <p className="text-center py-20 text-gray-400 font-bold">محتوای {TABS.find(t => t.id === activeTab)?.label} در حال بارگذاری است...</p>
+                     )}
+                   </motion.div>
+                 </AnimatePresence>
+               </div>
             </div>
           </div>
         </div>

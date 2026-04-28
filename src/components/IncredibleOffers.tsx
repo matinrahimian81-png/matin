@@ -44,33 +44,33 @@ export default function IncredibleOffers({
   };
 
   return (
-    <div className="container mx-auto px-4 space-y-16 py-12">
+    <div className="container mx-auto px-2 md:px-4 space-y-8 md:space-y-16 py-6 md:py-12">
       {/* 1. Flash Sale Banner ("شگفت‌آنگیز") */}
-      <section className="relative rounded-[40px] overflow-hidden p-1 shadow-2xl bg-[#EF2020]">
-        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 p-8 lg:p-12">
+      <section className="relative rounded-[20px] md:rounded-[40px] overflow-hidden p-1 shadow-2xl bg-[#EF2020]">
+        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-12 p-4 md:p-8 lg:p-12">
            {/* Sidebar Section */}
-           <div className="lg:w-[300px] flex flex-col items-center lg:items-start text-center lg:text-right gap-4">
+           <div className="w-full lg:w-[300px] flex flex-col items-center lg:items-start text-center lg:text-right gap-4">
              <div className="relative">
-                <h2 className="text-[44px] font-black leading-none tracking-tight text-white drop-shadow-2xl">شگفت<br/>انگیز</h2>
+                <h2 className="text-3xl md:text-[44px] font-black leading-none tracking-tight text-white drop-shadow-2xl">شگفت<br className="hidden lg:block" /> انگیز</h2>
              </div>
              
              {/* Countdown with Timer Pill */}
-             <div className="mt-4 flex flex-col gap-3">
-                <div className="flex flex-row items-center justify-center lg:justify-end gap-3 bg-white/10 backdrop-blur-xl px-5 py-3 rounded-2xl border border-white/20" dir="ltr">
-                  <Clock className="w-6 h-6 text-white" />
+             <div className="mt-2 md:mt-4 flex flex-col gap-3">
+                <div className="flex flex-row items-center justify-center lg:justify-end gap-2 md:gap-3 bg-white/10 backdrop-blur-xl px-4 py-2 md:px-5 md:py-3 rounded-2xl border border-white/20" dir="ltr">
+                  <Clock className="w-4 h-4 md:w-6 md:h-6 text-white" />
                   <div className="flex gap-2">
-                    <div className="bg-white text-[#EF2020] rounded-lg w-12 h-12 flex items-center justify-center text-xl font-black">{countdown.h}</div>
+                    <div className="bg-white text-[#EF2020] rounded-lg w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-lg md:text-xl font-black">{countdown.h}</div>
                     <span className="text-white font-black">:</span>
-                    <div className="bg-white text-[#EF2020] rounded-lg w-12 h-12 flex items-center justify-center text-xl font-black">{countdown.m}</div>
+                    <div className="bg-white text-[#EF2020] rounded-lg w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-lg md:text-xl font-black">{countdown.m}</div>
                     <span className="text-white font-black">:</span>
-                    <div className="bg-white text-[#EF2020] rounded-lg w-12 h-12 flex items-center justify-center text-xl font-black">{countdown.s}</div>
+                    <div className="bg-white text-[#EF2020] rounded-lg w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-lg md:text-xl font-black">{countdown.s}</div>
                   </div>
                 </div>
              </div>
 
              <button 
                onClick={() => onProductClick?.(incredibleProducts[0].id)}
-               className="mt-10 flex items-center gap-3 text-base font-black bg-white/10 hover:bg-white text-white hover:text-[#EF2020] px-8 py-3 rounded-2xl transition-all border border-white/20 shadow-lg group"
+               className="hidden lg:flex mt-10 items-center gap-3 text-base font-black bg-white/10 hover:bg-white text-white hover:text-[#EF2020] px-8 py-3 rounded-2xl transition-all border border-white/20 shadow-lg group"
              >
                 <span>مشاهده همه</span>
                 <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -78,31 +78,31 @@ export default function IncredibleOffers({
           </div>
 
           {/* Products Row */}
-          <div className="flex-grow relative overflow-hidden group">
-             {/* Navigation Buttons */}
+          <div className="w-full relative overflow-hidden group">
+             {/* Navigation Buttons - Hidden on Mobile */}
              <button 
                onClick={(e) => { e.stopPropagation(); scroll(scrollRef1, 'right'); }}
-               className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all"
+               className="hidden md:block absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all"
              >
                <ChevronRight className="w-6 h-6" />
              </button>
              <button 
                onClick={(e) => { e.stopPropagation(); scroll(scrollRef1, 'left'); }}
-               className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all"
+               className="hidden md:block absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all"
              >
                <ChevronLeft className="w-6 h-6" />
              </button>
 
              <div 
                ref={scrollRef1}
-               className="flex gap-4 overflow-x-auto no-scrollbar pb-8 pt-4 px-2 scroll-smooth"
+               className="flex gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-4 md:pb-8 pt-4 px-1 md:px-2 scroll-smooth"
              >
                 {incredibleProducts.map((product) => (
                   <motion.div
                     key={product.id}
                     whileHover={{ y: -8 }}
                     onClick={() => onProductClick?.(product.id)}
-                    className="min-w-[260px] bg-white rounded-3xl p-6 flex flex-col gap-4 cursor-pointer relative shadow-lg"
+                    className="min-w-[180px] md:min-w-[260px] bg-white rounded-2xl md:rounded-3xl p-3 md:p-6 flex flex-col gap-2 md:gap-4 cursor-pointer relative shadow-lg"
                   >
                     {/* Heart Button */}
                     <button 

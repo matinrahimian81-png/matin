@@ -49,13 +49,13 @@ export default function ProductCard({
 
   return (
     <motion.div
-      whileHover={{ y: -4, scale: 1.02, boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
+      whileHover={{ y: -4, scale: 1.01 }}
       onClick={() => onProductClick?.(id)}
-      className="w-[220px] bg-white rounded-lg p-2 transition-all duration-200 cursor-pointer flex flex-col relative group"
+      className="w-full bg-white rounded-lg p-1.5 md:p-2 transition-all duration-200 cursor-pointer flex flex-col relative group"
       style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
     >
       {/* 1. Image Area */}
-      <div className="relative w-full h-[200px] bg-[#F5F5F5] rounded-md overflow-hidden flex items-center justify-center p-4">
+      <div className="relative w-full h-[150px] md:h-[200px] bg-[#F5F5F5] rounded-md overflow-hidden flex items-center justify-center p-2 md:p-4">
         {/* Wishlist Heart Icon */}
         <button 
           onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(); }}

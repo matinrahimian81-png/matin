@@ -23,6 +23,7 @@ export default function Header({
   onCartClick,
   onWishlistClick,
   onUserClick,
+  onMenuClick,
   wishlistCount = 0
 }: { 
   onLogoClick?: () => void; 
@@ -31,16 +32,15 @@ export default function Header({
   onCartClick?: () => void;
   onWishlistClick?: () => void;
   onUserClick?: () => void;
+  onMenuClick?: () => void;
   wishlistCount?: number;
 }) {
   return (
-    <header className="sticky top-0 z-50 bg-white font-sans">
-      {/* 1. Top bar - Light Gray / Modern subtle style */}
-      <div className="bg-[#F0F0F1] text-gray-500 text-[10px] md:text-xs py-2 px-4 border-b border-gray-100">
+    <header className="sticky top-0 z-50 bg-white font-sans w-full">
+      {/* Top bar - Hidden on mobile */}
+      <div className="hidden md:block bg-[#F0F0F1] text-gray-500 text-[10px] md:text-xs py-2 px-4 border-b border-gray-100">
         <div className="container mx-auto flex justify-between items-center">
-          {/* Right side: Welcome text */}
           <div className="font-semibold">به دیجی‌کالا خوش آمدید</div>
-          {/* Left side: links */}
           <div className="flex items-center gap-6 font-semibold">
             <a href="#" className="hover:text-gray-900 transition-colors">فروش در دیجی‌کالا</a>
             <a href="#" className="hover:text-gray-900 transition-colors">دیجی‌کالا پرو</a>
@@ -49,78 +49,110 @@ export default function Header({
         </div>
       </div>
 
-      {/* 2. Main header (white background, box-shadow at bottom) */}
-      <div className="bg-white py-4 px-4 shadow-sm border-b border-gray-100 relative z-10">
-        <div className="container mx-auto flex items-center gap-8">
-          {/* Right: Digikala logo */}
-          <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
-            <div className="text-[#EF2020] text-3xl font-black italic tracking-tighter flex items-center gap-2">
-              <div className="bg-[#EF2020] w-10 h-10 rounded-lg flex items-center justify-center text-white text-xl shadow-lg shadow-red-200">D</div>
-              <span>DIGIKALA</span>
+      {/* Main header */}
+      <div className="bg-white py-2 md:py-4 px-4 shadow-sm border-b border-gray-100 relative z-10 w-full">
+        <div className="container mx-auto">
+          {/* Mobile Layout: Row 1 (Hamburger | Logo | Icons) */}
+          <div className="flex items-center justify-between gap-4 md:hidden mb-2">
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={onMenuClick}
+                className="p-2 text-gray-700 hover:bg-gray-100 rounded-xl"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
+                <div className="text-[#EF2020] text-2xl font-black italic tracking-tighter">
+                  DIGIKALA
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={onCartClick}
+                className="relative text-gray-700 p-2"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {cartCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#EF2020] text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+              <button 
+                onClick={onWishlistClick}
+                className="relative text-gray-700 p-2"
+              >
+                <Heart className="w-6 h-6" />
+              </button>
             </div>
           </div>
 
-          {/* Center: Large search input - Refined modern style */}
-          <div className="flex-grow flex items-center bg-gray-100 rounded-xl overflow-hidden border border-gray-100 focus-within:bg-white focus-within:border-gray-200 focus-within:shadow-md transition-all max-w-3xl mx-auto group">
-            <div className="flex-grow relative flex items-center">
-              <Search className="absolute right-4 w-5 h-5 text-gray-400 pointer-events-none group-focus-within:text-[#EF2020]" />
-              <input
-                type="text"
-                placeholder="جستجو در دیجی‌کالا..."
-                className="w-full bg-transparent py-3 pr-12 pl-6 text-sm outline-none font-medium text-gray-800"
-                onChange={(e) => onSearch?.(e.target.value)}
-              />
+          {/* Desktop Layout Layout */}
+          <div className="hidden md:flex items-center gap-8">
+            <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
+              <div className="text-[#EF2020] text-3xl font-black italic tracking-tighter flex items-center gap-2">
+                <div className="bg-[#EF2020] w-10 h-10 rounded-lg flex items-center justify-center text-white text-xl shadow-lg shadow-red-200">D</div>
+                <span>DIGIKALA</span>
+              </div>
             </div>
-          </div>
 
-          {/* Left side icons row */}
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={onUserClick}
-              className="flex items-center gap-2 text-gray-700 hover:text-[#EF2020] transition-colors border border-gray-200 px-4 py-2 rounded-xl text-sm font-black bg-white hover:bg-gray-50"
-            >
-              <User className="w-5 h-5" />
-              <span className="whitespace-nowrap hidden lg:block">ورود | ثبت‌نام</span>
-            </button>
+            {/* Desktop Search */}
+            <div className="flex-grow flex items-center bg-gray-100 rounded-xl overflow-hidden border border-gray-100 focus-within:bg-white focus-within:border-gray-200 focus-within:shadow-md transition-all max-w-3xl mx-auto group">
+              <div className="flex-grow relative flex items-center">
+                <Search className="absolute right-4 w-5 h-5 text-gray-400 pointer-events-none group-focus-within:text-[#EF2020]" />
+                <input
+                  type="text"
+                  placeholder="جستجو در دیجی‌کالا..."
+                  className="w-full bg-transparent py-3 pr-12 pl-6 text-sm outline-none font-medium text-gray-800"
+                  onChange={(e) => onSearch?.(e.target.value)}
+                />
+              </div>
+            </div>
 
-            <div className="h-8 w-px bg-gray-200"></div>
-
-            <div className="flex items-center gap-3">
-              {/* Shopping Cart Icon */}
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={onWishlistClick}
-                  className="relative text-gray-700 hover:text-red-500 transition-colors p-2 hover:bg-gray-50 rounded-xl"
-                >
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={onUserClick}
+                className="flex items-center gap-2 text-gray-700 hover:text-[#EF2020] transition-colors border border-gray-200 px-4 py-2 rounded-xl text-sm font-black bg-white hover:bg-gray-50"
+              >
+                <User className="w-5 h-5" />
+                <span className="whitespace-nowrap">ورود | ثبت‌نام</span>
+              </button>
+              <div className="h-8 w-px bg-gray-200"></div>
+              <div className="flex items-center gap-3">
+                <button onClick={onWishlistClick} className="relative text-gray-700 hover:text-red-500 p-2 rounded-xl">
                   <Heart className="w-6 h-6" />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">
-                      {wishlistCount}
-                    </span>
-                  )}
+                  {wishlistCount > 0 && <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">{wishlistCount}</span>}
                 </button>
-
-                <div className="h-6 w-px bg-gray-200 mx-1" />
-
-                <button 
-                  onClick={onCartClick}
-                  className="relative text-gray-700 hover:text-red-500 transition-colors p-2 hover:bg-gray-50 rounded-xl"
-                >
+                <div className="h-6 w-px bg-gray-200" />
+                <button onClick={onCartClick} className="relative text-gray-700 hover:text-red-500 p-2 rounded-xl">
                   <ShoppingCart className="w-6 h-6" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">
-                      {cartCount}
-                    </span>
-                  )}
+                  {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">{cartCount}</span>}
                 </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Search bar for Mobile (Always visible below header) */}
+          <div className="md:hidden mt-2">
+            <div className="flex items-center bg-gray-100 rounded-xl overflow-hidden border border-gray-100 focus-within:bg-white focus-within:border-gray-200 transition-all group">
+              <div className="flex-grow relative flex items-center">
+                <Search className="absolute right-4 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#EF2020]" />
+                <input
+                  type="text"
+                  placeholder="جستجو در دیجی‌کالا..."
+                  className="w-full bg-transparent py-2.5 pr-10 pl-4 text-xs outline-none font-medium text-gray-800"
+                  onChange={(e) => onSearch?.(e.target.value)}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Category menu navigation bar */}
-      <div className="bg-white border-b border-gray-100 px-4 shadow-sm">
+      {/* Category menu - Hidden on mobile */}
+      <div className="hidden md:block bg-white border-b border-gray-100 px-4 shadow-sm">
         <div className="container mx-auto flex items-center">
           {/* "All Categories" button on RIGHT (Start of row in RTL) */}
           <div className="relative group shrink-0">

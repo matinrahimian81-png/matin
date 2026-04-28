@@ -26,16 +26,18 @@ const EXTENDED_MAIN_CATEGORIES = [
 
 export function CategoryIcons() {
   return (
-    <section className="container mx-auto px-4 py-16">
-      <h2 className="text-center text-3xl font-black mb-12 text-gray-800">خرید بر اساس دسته‌بندی</h2>
-      <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-y-12 gap-x-6">
+    <section className="container mx-auto px-4 py-8 md:py-16">
+      <h2 className="text-right md:text-center text-xl md:text-3xl font-black mb-8 md:mb-12 text-gray-800">خرید بر اساس دسته‌بندی</h2>
+      
+      {/* Scrollable list on mobile, grid on desktop */}
+      <div className="flex overflow-x-auto no-scrollbar md:grid md:grid-cols-6 lg:grid-cols-8 gap-6 md:gap-y-12 md:gap-x-6 pb-4">
         {EXTENDED_MAIN_CATEGORIES.map((cat) => (
           <motion.div
             key={cat.id}
             whileHover={{ scale: 1.05 }}
-            className="flex flex-col items-center gap-4 cursor-pointer group"
+            className="flex flex-col items-center gap-2 md:gap-4 cursor-pointer group min-w-[80px] md:min-w-0"
           >
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-gray-50 bg-white shadow-xl shadow-black/5 flex items-center justify-center p-4 transition-all group-hover:border-[#EF2020]/20 group-hover:shadow-2xl">
+            <div className="w-16 h-16 md:w-32 md:h-32 rounded-full overflow-hidden border-2 md:border-4 border-gray-50 bg-white shadow-lg shadow-black/5 flex items-center justify-center p-2 md:p-4 transition-all group-hover:border-[#EF2020]/20 group-hover:shadow-2xl">
               <img 
                 src={cat.img} 
                 alt={cat.name} 
@@ -43,7 +45,7 @@ export function CategoryIcons() {
                 referrerPolicy="no-referrer"
               />
             </div>
-            <span className="text-xs md:text-sm font-black text-gray-700 text-center leading-tight transition-colors group-hover:text-[#EF2020]">
+            <span className="text-[10px] md:text-sm font-black text-gray-700 text-center leading-tight transition-colors group-hover:text-[#EF2020]">
               {cat.name}
             </span>
           </motion.div>

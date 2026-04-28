@@ -5,6 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import Header from './components/Header';
+import BottomNavigation from './components/BottomNavigation';
+import MobileDrawer from './components/MobileDrawer';
 import Hero from './components/Hero';
 import IncredibleOffers from './components/IncredibleOffers';
 import UserDashboard from './components/UserDashboard';
@@ -33,6 +35,26 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { supabaseService } = await import('./services/supabaseService');
+        const currentUser = await supabaseService.getCurrentUser();
+        setUser(currentUser);
+        
+        supabaseService.onAuthStateChange((_event, session) => {
+          setUser(session?.user || null);
+        });
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      }
+    };
+    fetchUser();
+  }, []);
   
   // Scroll to top when view changes
   useEffect(() => {
@@ -100,6 +122,14 @@ export default function App() {
           setIsCartOpen(false);
           setIsWishlistOpen(false);
         }}
+        onMenuClick={() => setIsDrawerOpen(true)}
+      />
+
+      <MobileDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
+        user={user}
+        onUserClick={() => setIsDashboardOpen(true)}
       />
 
       {/* Drawers and Overlays */}
@@ -332,6 +362,29 @@ export default function App() {
       </AnimatePresence>
 
       <Footer />
+
+      <BottomNavigation 
+        activeTab={activeTab} 
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'home') {
+            setSelectedProductId(null);
+            setSearchTerm('');
+            setIsDashboardOpen(false);
+          } else if (tab === 'profile') {
+            setIsDashboardOpen(true);
+          } else if (tab === 'wishlist') {
+            setIsWishlistOpen(true);
+            setIsCartOpen(false);
+            setIsDashboardOpen(false);
+          } else if (tab === 'search') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const searchInput = document.querySelector('input[placeholder="جستجو در دیجی‌کالا..."]') as HTMLInputElement;
+            searchInput?.focus();
+          }
+        }} 
+        orderCount={cartItems.length}
+      />
     </div>
   );
 }
