@@ -8,8 +8,40 @@
   --color-dk-dark: #3F4044;
 }
 
+@layer base {
+  *, ::before, ::after {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    direction: rtl;
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    background-color: white;
+    color: #3F4044;
+    font-family: var(--font-sans);
+    touch-action: manipulation;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Prevent user selection on interactive elements */
+  button, a, .tab-item {
+    user-select: none;
+  }
+}
+
 body {
-  @apply bg-white text-dk-dark font-sans;
+  @apply bg-[#F5F5F5] text-dk-dark font-sans;
 }
 
 @utility no-scrollbar {

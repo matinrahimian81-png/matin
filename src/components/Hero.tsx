@@ -42,15 +42,21 @@ export default function Hero() {
   const prev = () => setCurrent((prev) => (prev - 1 + BANNERS.length) % BANNERS.length);
 
   return (
-    <section className="relative w-full h-[380px] overflow-hidden group">
+    <section className="relative w-full h-[200px] md:h-[400px] overflow-hidden group">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="absolute inset-0"
+          transition={{ duration: 0.6 }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          onDragEnd={(_, info) => {
+            if (info.offset.x > 100) prev();
+            else if (info.offset.x < -100) next();
+          }}
+          className="absolute inset-0 cursor-grab active:cursor-grabbing"
         >
           <img
             src={BANNERS[current].image}
@@ -58,33 +64,30 @@ export default function Hero() {
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          {/* Gradient overlay from right */}
+          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-l from-black/60 to-transparent" />
           
           {/* Text Overlay (Right side RTL) */}
-          <div className="absolute inset-y-0 right-0 w-full md:w-1/2 flex flex-col justify-center items-start px-8 md:px-24 text-white text-right">
+          <div className="absolute inset-y-0 right-0 w-full md:w-1/2 flex flex-col justify-center items-start px-6 md:px-20 text-white text-right">
             <motion.h2
-              initial={{ x: 30, opacity: 0 }}
+              initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-4xl md:text-6xl font-black mb-4 leading-tight drop-shadow-lg"
+              className="text-xl md:text-5xl font-black mb-1 md:mb-4 drop-shadow-lg"
             >
               {BANNERS[current].title}
             </motion.h2>
             <motion.p
-              initial={{ x: 30, opacity: 0 }}
+              initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-xl md:text-2xl font-bold opacity-90 drop-shadow-md"
+              transition={{ delay: 0.2 }}
+              className="text-[10px] md:text-xl font-bold opacity-90"
             >
               {BANNERS[current].subtitle}
             </motion.p>
             <motion.button
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.6 }}
               whileHover={{ scale: 1.05 }}
-              className="mt-10 bg-[#EF2020] text-white px-10 py-4 rounded-xl font-black text-lg shadow-xl shadow-red-500/30 transition-transform"
+              whileTap={{ scale: 0.95 }}
+              className="mt-3 md:mt-8 bg-[#EF2020] text-white px-4 md:px-8 py-1.5 md:py-3 rounded-lg md:rounded-xl font-black text-[10px] md:text-base shadow-lg shadow-red-500/30"
             >
               مشاهده محصولات
             </motion.button>
@@ -92,29 +95,33 @@ export default function Hero() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Always visible on mobile/tablet, hover on laptop */}
       <button
         onClick={prev}
-        className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-3 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40"
+        className="flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-white/30 md:bg-white/20 backdrop-blur-md p-2 md:p-3 rounded-full text-white lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-white/40 z-20"
       >
-        <ChevronLeft className="w-8 h-8" />
+        <ChevronLeft className="w-5 h-5 md:w-8 md:h-8" />
       </button>
       <button
         onClick={next}
-        className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-3 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40"
+        className="flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-white/30 md:bg-white/20 backdrop-blur-md p-2 md:p-3 rounded-full text-white lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-white/40 z-20"
       >
-        <ChevronRight className="w-8 h-8" />
+        <ChevronRight className="w-5 h-5 md:w-8 md:h-8" />
       </button>
 
       {/* Dot Indicators */}
-      <div className="absolute bottom-10 left-12 flex gap-3">
+      <div className="absolute bottom-3 md:bottom-10 left-[34px] md:left-[90px] flex gap-1.5 md:gap-3">
         {BANNERS.map((_, i) => (
-          <button
+          <motion.button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              i === current ? 'bg-[#EF2020] w-12' : 'bg-white/40 hover:bg-white/60'
-            }`}
+            animate={{ 
+              width: i === current ? (window.innerWidth < 768 ? 20 : 40) : (window.innerWidth < 768 ? 6 : 12),
+              height: window.innerWidth < 768 ? 6 : 12,
+              backgroundColor: i === current ? '#EF2020' : 'rgba(255,255,255,0.6)'
+            }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="rounded-full"
           />
         ))}
       </div>

@@ -19,12 +19,12 @@ export default function DetailedProductSection({
   onToggleWishlist?: (id: number) => void;
 }) {
   return (
-    <section className="container mx-auto px-4 py-16">
-      <div className="flex items-center justify-between mb-10 border-b border-gray-100 pb-4">
-        <button onClick={() => onProductClick?.(ALL_PRODUCTS[0].id)} className="text-sm font-black text-blue-500 hover:text-blue-600 transition-colors">مشاهده همه</button>
-        <h2 className="text-2xl font-black text-gray-800">داغ‌ترین‌های دیجی‌کالا</h2>
+    <section className="container !max-w-none mx-auto px-4 lg:px-12 py-8 md:py-16">
+      <div className="flex items-center justify-between mb-6 md:mb-10 border-b border-gray-100 pb-4">
+        <button onClick={() => onProductClick?.(ALL_PRODUCTS[0].id)} className="text-xs md:text-sm font-black text-blue-500 hover:text-blue-600 transition-colors">مشاهده همه</button>
+        <h2 className="text-lg md:text-2xl font-black text-gray-800">داغ‌ترین‌های دیجی‌کالا</h2>
       </div>
-      <div className="flex flex-wrap justify-center lg:justify-end gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
         {ALL_PRODUCTS.slice(0, 5).map((p) => (
           <ProductCard
             key={p.id}

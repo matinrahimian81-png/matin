@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Search, User, ShoppingCart, Menu, MapPin, Heart, ChevronDown, LayoutGrid, Smartphone, Laptop, Shirt, Home, Sparkles, Gamepad2, Book, Trophy } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, User, ShoppingCart, Menu, Heart, LayoutGrid, Smartphone, Laptop, Shirt, Home, Sparkles, Gamepad2, Book, Trophy } from 'lucide-react';
 
 const CATEGORIES_NAV = [
   { id: 1, name: 'موبایل', icon: <Smartphone className="w-4 h-4" /> },
@@ -35,11 +36,24 @@ export default function Header({
   onMenuClick?: () => void;
   wishlistCount?: number;
 }) {
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const categoriesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (categoriesRef.current && !categoriesRef.current.contains(event.target as Node)) {
+        setIsCategoriesOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 bg-white font-sans w-full">
+    <header className="sticky top-0 left-0 right-0 z-[40] bg-white font-sans w-full shadow-[0_1px_4px_rgba(0,0,0,0.12)] md:shadow-none">
       {/* Top bar - Hidden on mobile */}
       <div className="hidden md:block bg-[#F0F0F1] text-gray-500 text-[10px] md:text-xs py-2 px-4 border-b border-gray-100">
-        <div className="container mx-auto flex justify-between items-center">
+        <div className="container !max-w-none mx-auto flex justify-between items-center px-4 lg:px-12">
           <div className="font-semibold">به دیجی‌کالا خوش آمدید</div>
           <div className="flex items-center gap-6 font-semibold">
             <a href="#" className="hover:text-gray-900 transition-colors">فروش در دیجی‌کالا</a>
@@ -49,180 +63,200 @@ export default function Header({
         </div>
       </div>
 
-      {/* Main header */}
-      <div className="bg-white py-2 md:py-4 px-4 shadow-sm border-b border-gray-100 relative z-10 w-full">
-        <div className="container mx-auto">
-          {/* Mobile Layout: Row 1 (Hamburger | Logo | Icons) */}
-          <div className="flex items-center justify-between gap-4 md:hidden mb-2">
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={onMenuClick}
-                className="p-2 text-gray-700 hover:bg-gray-100 rounded-xl"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-              <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
-                <div className="text-[#EF2020] text-2xl font-black italic tracking-tighter">
-                  DIGIKALA
-                </div>
+      {/* Main header row */}
+      <div className="bg-white h-[56px] px-3 md:px-0 md:h-[80px] border-b border-white md:border-gray-100 relative z-10 w-full flex items-center">
+        <div className="container !max-w-none mx-auto flex items-center justify-between w-full px-4 lg:px-12">
+          
+          {/* MOBILE LAYOUT CONTENT */}
+          <div className="flex items-center justify-between w-full md:hidden h-full">
+            <button 
+              onClick={onMenuClick}
+              className="w-10 h-10 flex items-center justify-center text-gray-800"
+              aria-label="Menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+
+            <div 
+              className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 cursor-pointer" 
+              onClick={onLogoClick}
+            >
+              <div className="text-[#EF2020] text-[24px] font-black italic tracking-tighter">
+                DIGIKALA
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button 
-                onClick={onCartClick}
-                className="relative text-gray-700 p-2"
+                onClick={onWishlistClick}
+                className="w-10 h-10 flex items-center justify-center relative text-gray-800"
+                aria-label="Wishlist"
               >
-                <ShoppingCart className="w-6 h-6" />
-                {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-[#EF2020] text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold">
-                    {cartCount}
+                <Heart className="w-6 h-6" />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#EF2020] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold">
+                    {wishlistCount}
                   </span>
                 )}
               </button>
               <button 
-                onClick={onWishlistClick}
-                className="relative text-gray-700 p-2"
+                onClick={onCartClick}
+                className="w-10 h-10 flex items-center justify-center relative text-gray-800"
+                aria-label="Shopping Cart"
               >
-                <Heart className="w-6 h-6" />
+                <ShoppingCart className="w-6 h-6" />
+                {cartCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#EF2020] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
 
-          {/* Desktop Layout Layout */}
-          <div className="hidden md:flex items-center gap-8">
-            <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
-              <div className="text-[#EF2020] text-3xl font-black italic tracking-tighter flex items-center gap-2">
-                <div className="bg-[#EF2020] w-10 h-10 rounded-lg flex items-center justify-center text-white text-xl shadow-lg shadow-red-200">D</div>
-                <span>DIGIKALA</span>
+          {/* DESKTOP LAYOUT CONTENT */}
+          <div className="hidden md:flex items-center h-full w-full justify-between">
+            {/* Right Side: Logo and Search */}
+            <div className="flex items-center gap-4 lg:gap-8 min-w-0 pr-2 lg:pr-4">
+              <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
+                <div className="text-[#EF2020] text-3xl lg:text-4xl font-black italic tracking-tighter">
+                  DIGIKALA
+                </div>
+              </div>
+
+              <div className="w-[300px] lg:w-[600px] flex items-center bg-[#F0F0F1] rounded-xl overflow-hidden border border-transparent focus-within:bg-white focus-within:border-gray-200 focus-within:shadow-md transition-all group">
+                <div className="flex-grow relative flex items-center h-12">
+                  <input
+                    type="text"
+                    placeholder="جستجو در دیجی‌کالا..."
+                    className="w-full bg-transparent py-3 pr-12 pl-6 text-sm outline-none font-medium text-gray-800 text-right"
+                    dir="rtl"
+                    onChange={(e) => onSearch?.(e.target.value)}
+                  />
+                  <Search className="absolute right-4 w-6 h-6 text-gray-400 group-focus-within:text-[#EF2020]" />
+                </div>
               </div>
             </div>
 
-            {/* Desktop Search */}
-            <div className="flex-grow flex items-center bg-gray-100 rounded-xl overflow-hidden border border-gray-100 focus-within:bg-white focus-within:border-gray-200 focus-within:shadow-md transition-all max-w-3xl mx-auto group">
-              <div className="flex-grow relative flex items-center">
-                <Search className="absolute right-4 w-5 h-5 text-gray-400 pointer-events-none group-focus-within:text-[#EF2020]" />
-                <input
-                  type="text"
-                  placeholder="جستجو در دیجی‌کالا..."
-                  className="w-full bg-transparent py-3 pr-12 pl-6 text-sm outline-none font-medium text-gray-800"
-                  onChange={(e) => onSearch?.(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
+            {/* Left Side: Actions */}
+            <div className="flex items-center gap-2 lg:gap-4 shrink-0 pr-4">
               <button 
                 onClick={onUserClick}
-                className="flex items-center gap-2 text-gray-700 hover:text-[#EF2020] transition-colors border border-gray-200 px-4 py-2 rounded-xl text-sm font-black bg-white hover:bg-gray-50"
+                className="flex items-center gap-2 text-gray-700 hover:bg-gray-50 border border-gray-200 px-3 lg:px-4 py-2 rounded-xl text-sm font-black transition-all"
               >
                 <User className="w-5 h-5" />
                 <span className="whitespace-nowrap">ورود | ثبت‌نام</span>
               </button>
-              <div className="h-8 w-px bg-gray-200"></div>
-              <div className="flex items-center gap-3">
-                <button onClick={onWishlistClick} className="relative text-gray-700 hover:text-red-500 p-2 rounded-xl">
-                  <Heart className="w-6 h-6" />
-                  {wishlistCount > 0 && <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">{wishlistCount}</span>}
-                </button>
-                <div className="h-6 w-px bg-gray-200" />
-                <button onClick={onCartClick} className="relative text-gray-700 hover:text-red-500 p-2 rounded-xl">
-                  <ShoppingCart className="w-6 h-6" />
-                  {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">{cartCount}</span>}
-                </button>
-              </div>
-            </div>
-          </div>
 
-          {/* Search bar for Mobile (Always visible below header) */}
-          <div className="md:hidden mt-2">
-            <div className="flex items-center bg-gray-100 rounded-xl overflow-hidden border border-gray-100 focus-within:bg-white focus-within:border-gray-200 transition-all group">
-              <div className="flex-grow relative flex items-center">
-                <Search className="absolute right-4 w-4 h-4 text-gray-400 pointer-events-none group-focus-within:text-[#EF2020]" />
-                <input
-                  type="text"
-                  placeholder="جستجو در دیجی‌کالا..."
-                  className="w-full bg-transparent py-2.5 pr-10 pl-4 text-xs outline-none font-medium text-gray-800"
-                  onChange={(e) => onSearch?.(e.target.value)}
-                />
-              </div>
+              <div className="w-px bg-gray-200 h-6 mx-1 lg:mx-2" />
+
+              <button 
+                onClick={onWishlistClick} 
+                className="relative text-gray-700 hover:text-[#EF2020] p-2 transition-colors"
+                aria-label="علاقه‌مندی‌ها"
+              >
+                <Heart className="w-6 h-6" />
+                {wishlistCount > 0 && <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">{wishlistCount}</span>}
+              </button>
+
+              <div className="w-px bg-gray-200 h-6 mx-1 lg:mx-2" />
+
+              <button 
+                onClick={onCartClick} 
+                className="relative text-gray-700 hover:text-[#EF2020] p-2 transition-colors"
+                aria-label="سبد خرید"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-[#EF2020] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">{cartCount}</span>}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Category menu - Hidden on mobile */}
-      <div className="hidden md:block bg-white border-b border-gray-100 px-4 shadow-sm">
-        <div className="container mx-auto flex items-center">
-          {/* "All Categories" button on RIGHT (Start of row in RTL) */}
-          <div className="relative group shrink-0">
-            <button className="flex items-center gap-3 py-4 pl-8 border-l border-gray-100 text-sm font-black text-gray-800 hover:text-[#EF2020] transition-colors">
-              <LayoutGrid className="w-5 h-5" />
-              <span>همه دسته‌بندی‌ها</span>
-            </button>
+      {/* MOBILE SEARCH ROW */}
+      <div className="md:hidden bg-white h-[60px] flex items-center px-[12px] border-b border-gray-100">
+        <div className="flex items-center bg-[#F5F5F5] h-[44px] w-full rounded-[22px] px-[12px]">
+          <Search className="w-[18px] h-[18px] text-[#999] shrink-0" />
+          <input
+            type="text"
+            placeholder="جستجو در دیجی‌کالا..."
+            className="flex-1 bg-transparent border-none outline-none px-2 text-sm text-gray-800 placeholder-[#999] font-medium text-right leading-none h-full"
+            dir="rtl"
+            onChange={(e) => onSearch?.(e.target.value)}
+          />
+        </div>
+      </div>
 
-            {/* Mock Mega-menu (Three levels placeholder) */}
-            <div className="absolute top-full right-0 w-[900px] bg-white shadow-2xl rounded-b-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex h-[400px] overflow-hidden">
-               {/* Level 1: Categories List */}
-               <div className="w-1/4 border-l border-gray-50 bg-gray-50/50 py-4 overflow-y-auto">
-                 {CATEGORIES_NAV.map(cat => (
-                   <div key={cat.id} className="px-6 py-3 flex items-center gap-3 text-xs font-bold text-gray-600 hover:text-[#EF2020] hover:bg-white cursor-pointer transition-colors">
-                      {cat.icon}
-                      <span>{cat.name}</span>
+      {/* Nav Row - Hidden on mobile */}
+      <div className="hidden md:block bg-white px-4 border-b border-gray-100">
+        <div className="container !max-w-none mx-auto flex items-center h-[40px] justify-start px-4 lg:px-12">
+          <div 
+            ref={categoriesRef}
+            className="relative shrink-0 h-full"
+            onMouseEnter={() => {
+              // Only use hover for laptop screens (lg)
+              if (window.innerWidth >= 1024) setIsCategoriesOpen(true);
+            }}
+            onMouseLeave={() => {
+              if (window.innerWidth >= 1024) setIsCategoriesOpen(false);
+            }}
+          >
+            <button 
+              onClick={() => {
+                // Toggle on click for tablet/all screens
+                setIsCategoriesOpen(!isCategoriesOpen);
+              }}
+              className={`flex items-center gap-3 h-full pl-8 text-[11px] font-black transition-colors relative ${isCategoriesOpen ? 'text-[#EF2020]' : 'text-gray-800 hover:text-[#EF2020]'}`}
+            >
+              <LayoutGrid className="w-5 h-5" />
+              <span>دسته‌بندی کالاها</span>
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-5 bg-gray-100" />
+            </button>
+            {/* Mega menu placeholder */}
+            <div className={`absolute top-full right-0 w-[900px] bg-white shadow-2xl rounded-b-2xl border border-gray-100 transition-all duration-200 flex h-[450px] overflow-hidden z-[1001] ${isCategoriesOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+                <div className="w-1/4 border-l border-gray-50 bg-gray-50/50 py-4 overflow-y-auto">
+                   {CATEGORIES_NAV.map(cat => (
+                     <div key={cat.id} className="px-6 py-3 flex items-center gap-3 text-xs font-bold text-gray-600 hover:text-[#EF2020] hover:bg-white cursor-pointer transition-colors">
+                        {cat.icon}
+                        <span>{cat.name}</span>
+                     </div>
+                   ))}
+                </div>
+                <div className="flex-grow p-10 grid grid-cols-3 gap-10">
+                   <div className="space-y-4">
+                      <h4 className="text-sm font-black text-[#EF2020] pb-2 border-b border-gray-100">برندهای محبوب</h4>
+                      <ul className="space-y-3 text-xs font-bold text-gray-500 uppercase">
+                         <li className="hover:text-gray-900 cursor-pointer">Samsung</li>
+                         <li className="hover:text-gray-900 cursor-pointer">Apple</li>
+                         <li className="hover:text-gray-900 cursor-pointer">Xiaomi</li>
+                         <li className="hover:text-gray-900 cursor-pointer">Sony</li>
+                      </ul>
                    </div>
-                 ))}
-               </div>
-               {/* Level 2 & 3: Details */}
-               <div className="flex-grow p-8 grid grid-cols-3 gap-8">
-                  <div className="space-y-4">
-                     <h4 className="text-sm font-black text-[#EF2020] pb-2 border-b border-gray-100">برندهای محبوب</h4>
-                     <ul className="space-y-2 text-xs font-bold text-gray-500">
-                        <li className="hover:text-gray-900 cursor-pointer">سامسونگ</li>
-                        <li className="hover:text-gray-900 cursor-pointer">اپل</li>
-                        <li className="hover:text-gray-900 cursor-pointer">شیائومی</li>
-                        <li className="hover:text-gray-900 cursor-pointer">هواوی</li>
-                     </ul>
-                  </div>
-                  <div className="space-y-4">
-                     <h4 className="text-sm font-black text-gray-800 pb-2 border-b border-gray-100">گوشی موبایل</h4>
-                     <ul className="space-y-2 text-xs font-bold text-gray-500">
-                        <li className="hover:text-gray-900 cursor-pointer">گوشی سامسونگ</li>
-                        <li className="hover:text-gray-900 cursor-pointer">گوشی شیائومی</li>
-                        <li className="hover:text-gray-900 cursor-pointer">گوشی اپل (آیفون)</li>
-                        <li className="hover:text-gray-900 cursor-pointer">گوشی نوکیا</li>
-                     </ul>
-                  </div>
-                  <div className="space-y-4">
-                     <h4 className="text-sm font-black text-gray-800 pb-2 border-b border-gray-100">لوازم جانبی</h4>
-                     <ul className="space-y-2 text-xs font-bold text-gray-500">
-                        <li className="hover:text-gray-900 cursor-pointer">کیف و کاور</li>
-                        <li className="hover:text-gray-900 cursor-pointer">محافظ صفحه نمایش</li>
-                        <li className="hover:text-gray-900 cursor-pointer">پاوربانک (شارژر همراه)</li>
-                        <li className="hover:text-gray-900 cursor-pointer">هندزفری، هدفون، هدست</li>
-                     </ul>
-                  </div>
-               </div>
+                   <div className="space-y-4">
+                      <h4 className="text-sm font-black text-gray-800 pb-2 border-b border-gray-100">موبایل</h4>
+                      <ul className="space-y-3 text-xs font-bold text-gray-500">
+                         <li className="hover:text-gray-900 cursor-pointer">گوشی موبایل</li>
+                         <li className="hover:text-gray-900 cursor-pointer">لوازم جانبی موبایل</li>
+                      </ul>
+                   </div>
+                   <div className="space-y-4">
+                      <h4 className="text-sm font-black text-gray-800 pb-2 border-b border-gray-100">کالای دیجیتال</h4>
+                      <ul className="space-y-3 text-xs font-bold text-gray-500">
+                         <li className="hover:text-gray-900 cursor-pointer">لپ تاپ</li>
+                         <li className="hover:text-gray-900 cursor-pointer">ساعت هوشمند</li>
+                      </ul>
+                   </div>
+                </div>
             </div>
           </div>
-
-          {/* Horizontal list next to the button */}
-          <nav className="flex items-center gap-8 py-4 px-8 overflow-x-auto no-scrollbar">
-            <a href="#" className="flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-[#EF2020] transition-colors relative group">
-               <span>شگفت‌انگیزها</span>
-               <span className="absolute bottom-[-16px] left-0 right-0 h-[3px] bg-[#EF2020] scale-x-0 group-hover:scale-x-100 transition-transform origin-right"></span>
-            </a>
-            <a href="#" className="flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-[#EF2020] transition-colors relative group">
-               <span>سوپرمارکت</span>
-               <span className="absolute bottom-[-16px] left-0 right-0 h-[3px] bg-[#EF2020] scale-x-0 group-hover:scale-x-100 transition-transform origin-right"></span>
-            </a>
-            <a href="#" className="flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-[#EF2020] transition-colors relative group">
-               <span>پرفروش‌ترین‌ها</span>
-               <span className="absolute bottom-[-16px] left-0 right-0 h-[3px] bg-[#EF2020] scale-x-0 group-hover:scale-x-100 transition-transform origin-right"></span>
-            </a>
-            <a href="#" className="flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-[#EF2020] transition-colors relative group">
-               <span>تخفیف‌ها و پیشنهادها</span>
-               <span className="absolute bottom-[-16px] left-0 right-0 h-[3px] bg-[#EF2020] scale-x-0 group-hover:scale-x-100 transition-transform origin-right"></span>
-            </a>
+          <nav className="flex items-center gap-6 lg:gap-10 h-full px-6 lg:px-8">
+            {['شگفت‌انگیزها', 'سوپرمارکت', 'کارت هدیه', 'پرفروش‌ترین‌ها', 'تخفیف‌ها'].map((link) => (
+              <a key={link} href="#" className="text-[11px] font-bold text-gray-600 hover:text-[#EF2020] transition-colors relative group h-full flex items-center">
+                 <span>{link}</span>
+                 <span className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#EF2020] scale-x-0 group-hover:scale-x-100 transition-transform origin-right"></span>
+              </a>
+            ))}
           </nav>
         </div>
       </div>

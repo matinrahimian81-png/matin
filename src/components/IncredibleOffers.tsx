@@ -44,7 +44,7 @@ export default function IncredibleOffers({
   };
 
   return (
-    <div className="container mx-auto px-2 md:px-4 space-y-8 md:space-y-16 py-6 md:py-12">
+    <div className="container !max-w-none mx-auto px-2 md:px-4 lg:px-12 space-y-8 md:space-y-16 py-6 md:py-12">
       {/* 1. Flash Sale Banner ("شگفت‌آنگیز") */}
       <section className="relative rounded-[20px] md:rounded-[40px] overflow-hidden p-1 shadow-2xl bg-[#EF2020]">
         <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-12 p-4 md:p-8 lg:p-12">
@@ -79,18 +79,18 @@ export default function IncredibleOffers({
 
           {/* Products Row */}
           <div className="w-full relative overflow-hidden group">
-             {/* Navigation Buttons - Hidden on Mobile */}
+             {/* Navigation Buttons - Always visible on mobile/tablet, hover on laptop */}
              <button 
                onClick={(e) => { e.stopPropagation(); scroll(scrollRef1, 'right'); }}
-               className="hidden md:block absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all"
+               className="absolute right-0 md:right-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-2 md:p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all lg:opacity-0 lg:group-hover:opacity-100"
              >
-               <ChevronRight className="w-6 h-6" />
+               <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
              </button>
              <button 
                onClick={(e) => { e.stopPropagation(); scroll(scrollRef1, 'left'); }}
-               className="hidden md:block absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all"
+               className="absolute left-0 md:left-2 top-1/2 -translate-y-1/2 z-30 bg-white/95 p-2 md:p-4 rounded-full shadow-2xl text-gray-800 hover:scale-110 active:scale-95 transition-all lg:opacity-0 lg:group-hover:opacity-100"
              >
-               <ChevronLeft className="w-6 h-6" />
+               <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
              </button>
 
              <div 
@@ -182,18 +182,18 @@ export default function IncredibleOffers({
         </div>
         
         <div className="p-10 relative group">
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows - Always visible on mobile/tablet, hover on laptop */}
           <button 
             onClick={(e) => { e.stopPropagation(); scroll(scrollRef2, 'right'); }}
-            className="absolute right-4 top-[40%] bg-white shadow-xl p-4 rounded-full text-gray-800 opacity-0 group-hover:opacity-100 transition-all hover:text-[#EF2020] border border-gray-100 z-20"
+            className="absolute right-4 top-[40%] bg-white shadow-xl p-3 md:p-4 rounded-full text-gray-800 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:text-[#EF2020] border border-gray-100 z-20"
           >
-             <ChevronRight className="w-6 h-6" />
+             <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); scroll(scrollRef2, 'left'); }}
-            className="absolute left-4 top-[40%] bg-white shadow-xl p-4 rounded-full text-gray-800 opacity-0 group-hover:opacity-100 transition-all hover:text-[#EF2020] border border-gray-100 z-20"
+            className="absolute left-4 top-[40%] bg-white shadow-xl p-3 md:p-4 rounded-full text-gray-800 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:text-[#EF2020] border border-gray-100 z-20"
           >
-             <ChevronLeft className="w-6 h-6" />
+             <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
 
           <div 

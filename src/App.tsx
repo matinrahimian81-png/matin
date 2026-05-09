@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { isSupabaseConfigured } from './lib/supabase';
 import Header from './components/Header';
 import BottomNavigation from './components/BottomNavigation';
 import MobileDrawer from './components/MobileDrawer';
@@ -40,6 +41,7 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return;
     const fetchUser = async () => {
       try {
         const { supabaseService } = await import('./services/supabaseService');
@@ -91,7 +93,7 @@ export default function App() {
   const wishlistItems = ALL_PRODUCTS.filter(p => wishlist.includes(p.id));
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]" dir="rtl">
+    <div className="min-h-screen bg-[#F5F5F5] selection:bg-red-100 selection:text-red-900" dir="rtl">
       <Header 
         onLogoClick={() => {
           setSelectedProductId(null);
@@ -157,14 +159,14 @@ export default function App() {
                 setIsCartOpen(false);
                 setIsWishlistOpen(false);
               }}
-              className="fixed inset-0 bg-black/40 z-[60] backdrop-blur-sm"
+              className="fixed inset-0 bg-black/40 z-[100] backdrop-blur-sm"
             />
             {isCartOpen && (
               <motion.div 
                 initial={{ x: -400 }}
                 animate={{ x: 0 }}
                 exit={{ x: -400 }}
-                className="fixed left-0 top-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl p-6 flex flex-col"
+                className="fixed left-0 top-0 h-full w-full max-w-md bg-white z-[110] shadow-2xl p-6 flex flex-col"
               >
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-xl font-black">سبد خرید شما</h2>
@@ -216,7 +218,7 @@ export default function App() {
                 initial={{ x: -400 }}
                 animate={{ x: 0 }}
                 exit={{ x: -400 }}
-                className="fixed left-0 top-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl p-6 flex flex-col"
+                className="fixed left-0 top-0 h-full w-full max-w-md bg-white z-[110] shadow-2xl p-6 flex flex-col"
               >
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-xl font-black">علاقه‌مندی‌ها</h2>
@@ -266,7 +268,7 @@ export default function App() {
             className="pb-12"
           >
             {searchTerm ? (
-              <section className="container mx-auto px-4 py-12">
+              <section className="container !max-w-none mx-auto px-4 lg:px-12 py-12">
                 <h2 className="text-xl font-black mb-8">نتایج جستجو برای "{searchTerm}"</h2>
                 {filteredProducts.length > 0 ? (
                   <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
@@ -300,7 +302,7 @@ export default function App() {
                 />
 
                 {/* Promo Banners Grid */}
-                <section className="container mx-auto px-4 py-8">
+                <section className="container !max-w-none mx-auto px-4 lg:px-12 py-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {PROMO_BANNERS.map((banner, i) => (
                       <motion.div
@@ -323,7 +325,7 @@ export default function App() {
                 />
 
                 {/* Feature Cards */}
-                <section className="container mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <section className="container !max-w-none mx-auto px-4 lg:px-12 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
                      <div className="text-5xl mb-6">🚀</div>
                      <h3 className="font-black text-lg mb-2">دیجی‌کالا پلاس</h3>

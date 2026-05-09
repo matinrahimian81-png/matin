@@ -68,7 +68,7 @@ export default function ProductDetail({
   return (
     <div className="bg-[#F5F5F5] min-h-screen pb-32" dir="rtl">
       {/* 1. Breadcrumb Navigation & Back Button */}
-      <div className="container mx-auto px-4 py-4 md:py-6 flex items-center justify-between">
+      <div className="container !max-w-none mx-auto px-4 lg:px-12 py-4 md:py-6 flex items-center justify-between">
         <nav className="hidden md:flex items-center gap-2 text-[13px] text-gray-500 font-bold overflow-x-auto no-scrollbar whitespace-nowrap">
           <button className="hover:text-gray-900 transition-colors" onClick={onBack}>خانه</button>
           <ChevronRight className="w-3.5 h-3.5 opacity-30" />
@@ -84,7 +84,7 @@ export default function ProductDetail({
         </button>
       </div>
 
-      <main className="container mx-auto px-0 md:px-4 flex flex-col lg:flex-row gap-8 items-start">
+      <main className="container !max-w-none mx-auto px-0 md:px-4 lg:px-12 flex flex-col lg:flex-row gap-8 items-start">
         
         {/* LEFT column (purchase box - Desktop only) */}
         <aside className="hidden lg:block w-[320px] sticky top-32 order-2 lg:order-1 shrink-0">

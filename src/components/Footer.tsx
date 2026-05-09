@@ -7,8 +7,8 @@ import { Instagram, Twitter, Linkedin, ShoppingCart } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-white mt-12 py-8">
-      <div className="container mx-auto px-4">
+    <footer className="border-t border-gray-200 bg-white mt-12 py-8 w-full">
+      <div className="container !max-w-none mx-auto px-4 lg:px-12">
         {/* Top section: Logo and social */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-8 border-b border-gray-100">
           <div>

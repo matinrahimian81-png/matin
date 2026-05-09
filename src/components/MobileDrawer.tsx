@@ -1,3 +1,8 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronLeft, Smartphone, Laptop, Shirt, Home, Sparkles, Gamepad2, Book, Trophy, User } from 'lucide-react';
 
@@ -33,7 +38,7 @@ export default function MobileDrawer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-[100] backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 z-[200] backdrop-blur-sm"
           />
 
           {/* Drawer */}
@@ -42,7 +47,7 @@ export default function MobileDrawer({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-[85%] max-w-[320px] bg-white z-[101] shadow-2xl flex flex-col"
+            className="fixed top-0 right-0 h-full w-[85%] max-w-[320px] bg-white z-[210] shadow-2xl flex flex-col"
           >
             {/* Header */}
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
