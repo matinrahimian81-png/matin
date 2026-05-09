@@ -110,7 +110,7 @@ export default function ProductDetail({
 
               <div className="flex items-center gap-2 text-emerald-600 font-bold text-[13px] bg-emerald-50 p-3 rounded-xl">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                <span>{product.inStock ? 'موجود در انبار دیجی‌کالا' : 'ناموجود'}</span>
+                <span>{product.inStock ? 'موجود در انبار متین‌کالا' : 'ناموجود'}</span>
               </div>
             </div>
 

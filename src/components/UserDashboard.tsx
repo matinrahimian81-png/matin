@@ -165,7 +165,7 @@ export default function UserDashboard({
   const menuItems = [
     { id: 'orders', label: 'سفارش‌های من', icon: Package },
     { id: 'wishlist', label: 'علاقه‌مندی‌ها', icon: Heart },
-    { id: 'wallet', label: 'کیف پول دیجی‌پی', icon: Wallet },
+    { id: 'wallet', label: 'کیف پول متین‌پی', icon: Wallet },
     { id: 'addresses', label: 'آدرس‌های من', icon: MapPin },
     { id: 'comments', label: 'نظرات من', icon: MessageSquare },
     { id: 'notifications', label: 'اعلان‌ها', icon: Bell },

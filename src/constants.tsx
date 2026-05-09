@@ -6,12 +6,12 @@
 import { ShoppingBag, Flame, BadgePercent, LayoutGrid, Clock, MapPin, Search, User, ShoppingCart, Menu, ChevronLeft } from 'lucide-react';
 
 export const CATEGORIES = [
-  { id: 1, title: 'دیجی‌کالا جت', icon: <Flame className="w-6 h-6 text-pink-500" /> },
-  { id: 2, title: 'دیجی‌پی', icon: <BadgePercent className="w-6 h-6 text-blue-500" /> },
+  { id: 1, title: 'متین‌کالا جت', icon: <Flame className="w-6 h-6 text-pink-500" /> },
+  { id: 2, title: 'متین‌پی', icon: <BadgePercent className="w-6 h-6 text-blue-500" /> },
   { id: 3, title: 'حراج استثنایی', icon: <Flame className="w-6 h-6 text-red-500" /> },
   { id: 4, title: 'سوپرمارکت', icon: <ShoppingBag className="w-6 h-6 text-green-500" /> },
-  { id: 5, title: 'ماموریت دیجی‌کالا', icon: <LayoutGrid className="w-6 h-6 text-purple-500" /> },
-  { id: 6, title: 'پیشنهادهای دیجی‌کالا', icon: <BadgePercent className="w-6 h-6 text-orange-500" /> },
+  { id: 5, title: 'ماموریت متین‌کالا', icon: <LayoutGrid className="w-6 h-6 text-purple-500" /> },
+  { id: 6, title: 'پیشنهادهای متین‌کالا', icon: <BadgePercent className="w-6 h-6 text-orange-500" /> },
 ];
 
 export const INCREDIBLE_PRODUCTS = [

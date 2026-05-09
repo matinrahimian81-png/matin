@@ -12,7 +12,7 @@ export default function Footer() {
         {/* Top section: Logo and social */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-8 border-b border-gray-100">
           <div>
-            <span className="text-[#EF2020] text-3xl font-black italic tracking-tighter">DIGIKALA</span>
+            <span className="text-[#EF2020] text-3xl font-black italic tracking-tighter">MATINKALA</span>
             <div className="text-gray-500 text-sm mt-2">
               تلفن پشتیبانی ۶۱۹۳۰۰۰۰ - ۰۲۱ | ۷ روز هفته، ۲۴ ساعته پاسخگوی شما هستیم
             </div>
@@ -33,11 +33,11 @@ export default function Footer() {
         {/* Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-10 text-sm">
           <div className="flex flex-col gap-4">
-            <h4 className="font-bold text-gray-900">با دیجی‌کالا</h4>
-            <a href="#" className="text-gray-500 hover:text-[#EF2020]">اتاق خبر دیجی‌کالا</a>
-            <a href="#" className="text-gray-500 hover:text-[#EF2020]">فروش در دیجی‌کالا</a>
+            <h4 className="font-bold text-gray-900">با متین‌کالا</h4>
+            <a href="#" className="text-gray-500 hover:text-[#EF2020]">اتاق خبر متین‌کالا</a>
+            <a href="#" className="text-gray-500 hover:text-[#EF2020]">فروش در متین‌کالا</a>
             <a href="#" className="text-gray-500 hover:text-[#EF2020]">فرصت‌های شغلی</a>
-            <a href="#" className="text-gray-500 hover:text-[#EF2020]">گزارش تخلف در دیجی‌کالا</a>
+            <a href="#" className="text-gray-500 hover:text-[#EF2020]">گزارش تخلف در متین‌کالا</a>
           </div>
           <div className="flex flex-col gap-4">
             <h4 className="font-bold text-gray-900">خدمات مشتریان</h4>
@@ -71,7 +71,7 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             <span className="text-2xl font-bold flex items-center gap-2">
               <ShoppingCart className="w-8 h-8" />
-              دانلود اپلیکیشن دیجی‌کالا
+              دانلود اپلیکیشن متین‌کالا
             </span>
           </div>
           <div className="flex flex-wrap gap-4 justify-center">
@@ -82,7 +82,7 @@ export default function Footer() {
         </div>
 
         <div className="text-center text-gray-400 text-xs py-8 border-t border-gray-100">
-           استفاده از مطالب فروشگاه اینترنتی دیجی‌کالا فقط برای مقاصد غیرتجاری و با ذکر منبع بلامانع است. کلیه حقوق این سایت متعلق به شرکت نوآوران فن آوازه (فروشگاه اینترنتی دیجی‌کالا) می‌باشد.
+           استفاده از مطالب فروشگاه اینترنتی متین‌کالا فقط برای مقاصد غیرتجاری و با ذکر منبع بلامانع است. کلیه حقوق این سایت متعلق به شرکت نوآوران فن آوازه (فروشگاه اینترنتی متین‌کالا) می‌باشد.
         </div>
       </div>
     </footer>

@@ -54,10 +54,10 @@ export default function Header({
       {/* Top bar - Hidden on mobile */}
       <div className="hidden md:block bg-[#F0F0F1] text-gray-500 text-[10px] md:text-xs py-2 px-4 border-b border-gray-100">
         <div className="container !max-w-none mx-auto flex justify-between items-center px-4 lg:px-12">
-          <div className="font-semibold">به دیجی‌کالا خوش آمدید</div>
+          <div className="font-semibold">به متین‌کالا خوش آمدید</div>
           <div className="flex items-center gap-6 font-semibold">
-            <a href="#" className="hover:text-gray-900 transition-colors">فروش در دیجی‌کالا</a>
-            <a href="#" className="hover:text-gray-900 transition-colors">دیجی‌کالا پرو</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">فروش در متین‌کالا</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">متین‌کالا پرو</a>
             <a href="#" className="hover:text-gray-900 transition-colors">راهنمای خرید</a>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function Header({
               onClick={onLogoClick}
             >
               <div className="text-[#EF2020] text-[24px] font-black italic tracking-tighter">
-                DIGIKALA
+                MATINKALA
               </div>
             </div>
 
@@ -120,7 +120,7 @@ export default function Header({
             <div className="flex items-center gap-4 lg:gap-8 min-w-0 pr-2 lg:pr-4">
               <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
                 <div className="text-[#EF2020] text-3xl lg:text-4xl font-black italic tracking-tighter">
-                  DIGIKALA
+                  MATINKALA
                 </div>
               </div>
 
@@ -128,7 +128,7 @@ export default function Header({
                 <div className="flex-grow relative flex items-center h-12">
                   <input
                     type="text"
-                    placeholder="جستجو در دیجی‌کالا..."
+                    placeholder="جستجو در متین‌کالا..."
                     className="w-full bg-transparent py-3 pr-12 pl-6 text-sm outline-none font-medium text-gray-800 text-right"
                     dir="rtl"
                     onChange={(e) => onSearch?.(e.target.value)}
@@ -180,7 +180,7 @@ export default function Header({
           <Search className="w-[18px] h-[18px] text-[#999] shrink-0" />
           <input
             type="text"
-            placeholder="جستجو در دیجی‌کالا..."
+            placeholder="جستجو در متین‌کالا..."
             className="flex-1 bg-transparent border-none outline-none px-2 text-sm text-gray-800 placeholder-[#999] font-medium text-right leading-none h-full"
             dir="rtl"
             onChange={(e) => onSearch?.(e.target.value)}

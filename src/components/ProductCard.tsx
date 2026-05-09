@@ -108,7 +108,7 @@ export default function ProductCard({
               ))}
             </div>
           </div>
-          <p className="text-[10px] text-gray-400 font-medium">فروشنده: دیجی‌کالا</p>
+          <p className="text-[10px] text-gray-400 font-medium">فروشنده: متین‌کالا</p>
         </div>
 
         {/* 3. Price Section */}

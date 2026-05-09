@@ -328,17 +328,17 @@ export default function App() {
                 <section className="container !max-w-none mx-auto px-4 lg:px-12 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
                      <div className="text-5xl mb-6">🚀</div>
-                     <h3 className="font-black text-lg mb-2">دیجی‌کالا پلاس</h3>
+                     <h3 className="font-black text-lg mb-2">متین‌کالا پلاس</h3>
                      <p className="text-xs text-gray-500 font-medium leading-relaxed">ارسال رایگان، بازگشت وجه و پیشنهادهای اختصاصی برای اعضا</p>
                   </div>
                   <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
                      <div className="text-5xl mb-6">⚡</div>
-                     <h3 className="font-black text-lg mb-2">دیجی‌کالا جت</h3>
+                     <h3 className="font-black text-lg mb-2">متین‌کالا جت</h3>
                      <p className="text-xs text-gray-500 font-medium leading-relaxed">تحویل سوپرمارکتی در کمتر از ۴۵ دقیقه</p>
                   </div>
                   <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
                      <div className="text-5xl mb-6">🎁</div>
-                     <h3 className="font-black text-lg mb-2">دیجی‌کلاب</h3>
+                     <h3 className="font-black text-lg mb-2">متین‌کلاب</h3>
                      <p className="text-xs text-gray-500 font-medium leading-relaxed">امتیاز بگیرید و با جایزه‌های میلیونی شانس خود را امتحان کنید</p>
                   </div>
                 </section>
@@ -381,7 +381,7 @@ export default function App() {
             setIsDashboardOpen(false);
           } else if (tab === 'search') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            const searchInput = document.querySelector('input[placeholder="جستجو در دیجی‌کالا..."]') as HTMLInputElement;
+            const searchInput = document.querySelector('input[placeholder="جستجو در متین‌کالا..."]') as HTMLInputElement;
             searchInput?.focus();
           }
         }} 
