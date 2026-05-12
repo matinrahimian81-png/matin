@@ -39,24 +39,79 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
+    // Check localStorage first for manual login (e.g. admin)
+    const savedUser = localStorage.getItem('matinkala_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+
     if (!isSupabaseConfigured) return;
-    const fetchUser = async () => {
+
+    const init = async () => {
       try {
         const { supabaseService } = await import('./services/supabaseService');
+        
+        // Fetch Auth
         const currentUser = await supabaseService.getCurrentUser();
-        setUser(currentUser);
+        if (currentUser) {
+          setUser(currentUser);
+          localStorage.setItem('matinkala_user', JSON.stringify(currentUser));
+        }
         
         supabaseService.onAuthStateChange((_event, session) => {
-          setUser(session?.user || null);
+          const u = session?.user || null;
+          if (u) {
+            setUser(u);
+            localStorage.setItem('matinkala_user', JSON.stringify(u));
+          } else {
+            const saved = localStorage.getItem('matinkala_user');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.email === 'admin@matinkala.com') return;
+            }
+            setUser(null);
+            localStorage.removeItem('matinkala_user');
+          }
         });
+
+        // Fetch Products
+        try {
+          const dbProducts = await supabaseService.getProducts();
+          if (dbProducts) {
+            setProducts(dbProducts);
+            console.log(`Loaded ${dbProducts.length} products from database`);
+          }
+        } catch (dbErr) {
+          console.error('Failed to load products from database:', dbErr);
+          // If the table doesn't exist yet, we can keep the local ones
+          // but if we are here and Supabase is configured, we probably want to know why it failed.
+          // For now, let's keep it empty if it failed but was configured.
+          setProducts([]);
+        }
       } catch (err) {
-        console.error('Error fetching user:', err);
+        console.error('Init error:', err);
+        setProducts([]);
+      } finally {
+        setLoadingProducts(false);
       }
     };
-    fetchUser();
+
+    init();
   }, []);
+
+  const handleLogin = (u: any) => {
+    setUser(u);
+    localStorage.setItem('matinkala_user', JSON.stringify(u));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('matinkala_user');
+  };
   
   // Scroll to top when view changes
   useEffect(() => {
@@ -84,17 +139,33 @@ export default function App() {
     );
   };
 
-  const filteredProducts = ALL_PRODUCTS.filter(p => 
+  const refreshProducts = async () => {
+    try {
+      const { supabaseService } = await import('./services/supabaseService');
+      const dbProducts = await supabaseService.getProducts();
+      if (dbProducts) {
+        setProducts(dbProducts);
+      }
+    } catch (err) {
+      console.error('Refresh products error:', err);
+      // Don't fallback to sample data on refresh
+    }
+  };
+
+  const activeProducts = isSupabaseConfigured ? products : ALL_PRODUCTS;
+
+  const filteredProducts = activeProducts.filter(p => 
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedProduct = ALL_PRODUCTS.find(p => p.id === selectedProductId) || ALL_PRODUCTS[0];
+  const selectedProduct = activeProducts.find(p => p.id === selectedProductId) || activeProducts[0] || null;
 
-  const wishlistItems = ALL_PRODUCTS.filter(p => wishlist.includes(p.id));
+  const wishlistItems = activeProducts.filter(p => wishlist.includes(p.id));
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] selection:bg-red-100 selection:text-red-900" dir="rtl">
       <Header 
+        user={user}
         onLogoClick={() => {
           setSelectedProductId(null);
           setSearchTerm('');
@@ -142,6 +213,9 @@ export default function App() {
             wishlist={wishlist}
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
+            onLogin={handleLogin}
+            onLogout={handleLogout}
+            onProductChange={refreshProducts}
             onProductClick={(id) => {
               setSelectedProductId(id);
               setIsDashboardOpen(false);
@@ -268,8 +342,8 @@ export default function App() {
             className="pb-12"
           >
             {searchTerm ? (
-              <section className="container !max-w-none mx-auto px-4 lg:px-12 py-12">
-                <h2 className="text-xl font-black mb-8">نتایج جستجو برای "{searchTerm}"</h2>
+              <section className="w-full mx-auto py-12">
+                <h2 className="text-xl font-black mb-8 px-4">نتایج جستجو برای "{searchTerm}"</h2>
                 {filteredProducts.length > 0 ? (
                   <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
                     {filteredProducts.map(product => (
@@ -295,6 +369,7 @@ export default function App() {
                 <Hero />
                 <CategoryIcons />
                 <IncredibleOffers 
+                  products={activeProducts}
                   onProductClick={setSelectedProductId} 
                   onAddToCart={addToCart}
                   wishlist={wishlist}
@@ -302,8 +377,8 @@ export default function App() {
                 />
 
                 {/* Promo Banners Grid */}
-                <section className="container !max-w-none mx-auto px-4 lg:px-12 py-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <section className="w-full mx-auto py-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2 md:px-4">
                     {PROMO_BANNERS.map((banner, i) => (
                       <motion.div
                         key={i}
@@ -317,15 +392,17 @@ export default function App() {
                 </section>
 
                 <MainCategoryGrid />
+
                 <DetailedProductSection 
+                  products={activeProducts}
                   onProductClick={setSelectedProductId} 
                   onAddToCart={addToCart}
                   wishlist={wishlist}
                   onToggleWishlist={toggleWishlist}
                 />
 
-                {/* Feature Cards */}
-                <section className="container !max-w-none mx-auto px-4 lg:px-12 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Feature Cards Status */}
+                <section className="w-full mx-auto py-12 grid grid-cols-1 md:grid-cols-3 gap-6 px-2 md:px-4">
                   <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
                      <div className="text-5xl mb-6">🚀</div>
                      <h3 className="font-black text-lg mb-2">متین‌کالا پلاس</h3>
@@ -345,7 +422,7 @@ export default function App() {
               </>
             )}
           </motion.main>
-        ) : (
+        ) : (selectedProduct ? (
           <motion.div
             key="detail"
             initial={{ opacity: 0, x: 100 }}
@@ -360,7 +437,12 @@ export default function App() {
               onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
             />
           </motion.div>
-        )}
+        ) : (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <p className="text-gray-500 font-bold">محصول مورد نظر یافت نشد</p>
+            <button onClick={() => setSelectedProductId(null)} className="mr-4 text-blue-500 font-black underline">بازگشت به خانه</button>
+          </div>
+        ))}
       </AnimatePresence>
 
       <Footer />

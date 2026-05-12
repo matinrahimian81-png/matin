@@ -22,17 +22,6 @@ import { motion, AnimatePresence } from 'motion/react';
 
 import { ProductData } from '../types';
 
-const THUMBNAILS = [
-  'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=1000&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1000&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1610792516307-ea5acd9c3b00?q=80&w=1000&auto=format&fit=crop',
-];
-
-const COLORS = [
-  { name: 'مشکی', hex: '#000000' },
-  { name: 'تیتانیوم', hex: '#444444' },
-];
-
 const TABS = [
   { id: 'specs', label: 'مشخصات' },
   { id: 'review', label: 'نقد و بررسی' },
@@ -58,8 +47,8 @@ export default function ProductDetail({
   const [activeTab, setActiveTab] = useState('specs');
   const [quantity, setQuantity] = useState(1);
 
-  // Use product image if available
-  const displayImages = [product.image, ...THUMBNAILS];
+  // Use product images if available
+  const displayImages = product.images && product.images.length > 0 ? product.images : [product.image];
 
   const handleBuy = () => {
     onAddToCart?.();
@@ -68,7 +57,7 @@ export default function ProductDetail({
   return (
     <div className="bg-[#F5F5F5] min-h-screen pb-32" dir="rtl">
       {/* 1. Breadcrumb Navigation & Back Button */}
-      <div className="container !max-w-none mx-auto px-4 lg:px-12 py-4 md:py-6 flex items-center justify-between">
+      <div className="container mx-auto px-4 lg:px-12 py-4 md:py-6 flex items-center justify-between">
         <nav className="hidden md:flex items-center gap-2 text-[13px] text-gray-500 font-bold overflow-x-auto no-scrollbar whitespace-nowrap">
           <button className="hover:text-gray-900 transition-colors" onClick={onBack}>خانه</button>
           <ChevronRight className="w-3.5 h-3.5 opacity-30" />
@@ -84,7 +73,7 @@ export default function ProductDetail({
         </button>
       </div>
 
-      <main className="container !max-w-none mx-auto px-0 md:px-4 lg:px-12 flex flex-col lg:flex-row gap-8 items-start">
+      <main className="container mx-auto px-0 md:px-4 lg:px-12 flex flex-col lg:flex-row gap-8 items-start">
         
         {/* LEFT column (purchase box - Desktop only) */}
         <aside className="hidden lg:block w-[320px] sticky top-32 order-2 lg:order-1 shrink-0">
@@ -96,10 +85,10 @@ export default function ProductDetail({
             {/* Price Box */}
             <div className="space-y-4">
               <div className="flex flex-col items-end gap-1">
-                {product.discountPercentage && (
+                {(product.discountPercentage ?? 0) > 0 && (
                   <div className="flex items-center gap-2">
                     <span className="bg-[#EF2020] text-white text-[10px] font-black px-2 py-0.5 rounded-full">{product.discountPercentage}٪ تخفیف</span>
-                    {product.oldPrice && <span className="text-sm text-gray-400 line-through">{product.oldPrice.toLocaleString()}</span>}
+                    {(product.oldPrice ?? 0) > 0 && <span className="text-sm text-gray-400 line-through">{product.oldPrice?.toLocaleString()}</span>}
                   </div>
                 )}
                 <div className="flex items-center gap-1 font-black text-[28px] text-gray-900 leading-none">
@@ -170,15 +159,17 @@ export default function ProductDetail({
                  />
                  
                  {/* Mobile Image Pagination dots */}
-                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 md:hidden">
-                    {displayImages.slice(0, 5).map((_, i) => (
-                      <div key={i} className={`h-1.5 rounded-full transition-all ${selectedImg === i ? 'w-4 bg-[#EF2020]' : 'w-1.5 bg-gray-200'}`} />
-                    ))}
-                 </div>
+                 {displayImages.length > 1 && (
+                   <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 md:hidden">
+                      {displayImages.slice(0, 5).map((_, i) => (
+                        <div key={i} className={`h-1.5 rounded-full transition-all ${selectedImg === i ? 'w-4 bg-[#EF2020]' : 'w-1.5 bg-gray-200'}`} />
+                      ))}
+                   </div>
+                 )}
               </div>
               
               <div className="hidden md:flex gap-3 overflow-x-auto no-scrollbar pb-2">
-                {displayImages.slice(0, 5).map((img, i) => (
+                {displayImages.length > 1 && displayImages.slice(0, 5).map((img, i) => (
                   <button 
                     key={i}
                     onClick={() => setSelectedImg(i)}
@@ -201,43 +192,37 @@ export default function ProductDetail({
               <div className="flex items-center gap-4 border-y border-gray-50 py-3 md:py-4">
                 <div className="flex items-center gap-1.5 px-1 py-0.5 rounded-lg">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-black text-gray-800">{product.rating}</span>
+                  <span className="text-sm font-black text-gray-800">{product.rating || 5}</span>
                   <span className="text-[10px] text-gray-400 font-bold">از ۵</span>
                 </div>
                 <div className="h-4 w-px bg-gray-100" />
-                <span className="text-[12px] md:text-[13px] text-gray-400 font-bold group cursor-pointer hover:text-blue-500">({product.reviewCount} نظر کاربران)</span>
+                <span className="text-[12px] md:text-[13px] text-gray-400 font-bold group cursor-pointer hover:text-blue-500">({product.reviewCount || 0} نظر کاربران)</span>
               </div>
 
-              {/* Color Selector */}
+              {/* Color Selector (Only if relevant or keep as generic for now) */}
               <div className="space-y-3 md:space-y-4">
                 <h4 className="text-xs md:text-sm font-black text-gray-800 flex items-center gap-2">
-                  <span>انتخاب رنگ:</span>
-                  <span className="text-gray-400 text-[10px] md:text-xs font-black">{COLORS[selectedColor].name}</span>
+                  <span>انتخاب ویژگی:</span>
+                  <span className="text-gray-400 text-[10px] md:text-xs font-black">استاندارد</span>
                 </h4>
                 <div className="flex gap-4">
-                  {COLORS.map((color, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedColor(i)}
-                      className={`w-8 h-8 md:w-10 md:h-10 rounded-full border-2 p-0.5 transition-all relative ${selectedColor === i ? 'border-[#EF2020] scale-110 bg-[#EF2020]/5' : 'border-transparent'}`}
-                    >
-                      <div className="w-full h-full rounded-full border border-black/10" style={{ backgroundColor: color.hex }} />
-                      {selectedColor === i && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Check className="w-4 h-4 text-white drop-shadow-md" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#EF2020] p-0.5 bg-[#EF2020]/5 relative">
+                    <div className="w-full h-full rounded-full bg-gray-200 border border-black/10" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-[#EF2020] drop-shadow-md" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-4 bg-blue-50 p-3 md:p-4 rounded-xl flex items-start gap-3 md:gap-4">
-                 <Info className="w-4 h-4 md:w-5 md:h-5 text-blue-500 shrink-0 mt-0.5" />
-                 <p className="text-[10px] md:text-[11px] font-bold text-blue-800 leading-relaxed italic">
-                    گوشی موبایل Galaxy S24 Ultra ریجیستر شده است و به صورت پک اصلی به فروش می‌رسد.
-                 </p>
-              </div>
+              {product.details && (
+                <div className="mt-4 bg-blue-50 p-3 md:p-4 rounded-xl flex items-start gap-3 md:gap-4">
+                  <Info className="w-4 h-4 md:w-5 md:h-5 text-blue-500 shrink-0 mt-0.5" />
+                  <p className="text-[10px] md:text-[11px] font-bold text-blue-800 leading-relaxed italic">
+                    {product.details}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -254,8 +239,8 @@ export default function ProductDetail({
                   <span>{product.price.toLocaleString()}</span>
                   <span className="text-[10px] font-bold opacity-50">تومان</span>
                </div>
-               {product.discountPercentage && (
-                 <span className="text-[10px] text-gray-400 line-through">{(product.oldPrice || 0).toLocaleString()}</span>
+               {(product.discountPercentage ?? 0) > 0 && (
+                 <span className="text-[10px] text-gray-400 line-through">{(product.oldPrice || 0) > 0 ? product.oldPrice?.toLocaleString() : ''}</span>
                )}
             </div>
           </div>
@@ -302,18 +287,9 @@ export default function ProductDetail({
                             >
                                <div className="pb-4 text-xs font-bold text-gray-500 leading-relaxed">
                                   {tab.id === 'specs' ? (
-                                     <div className="space-y-2">
-                                        {[
-                                          { label: 'حافظه داخلی', value: '۲۵۶ گیگابایت' },
-                                          { label: 'مقدار RAM', value: '۱۲ گیگابایت' },
-                                          { label: 'رزولوشن عکس', value: '۲۰۰ مگاپیکسل' },
-                                        ].map((item, i) => (
-                                          <div key={i} className="flex justify-between py-2 border-b border-gray-50/50">
-                                             <span className="opacity-60">{item.label}</span>
-                                             <span className="text-gray-800">{item.value}</span>
-                                          </div>
-                                        ))}
-                                     </div>
+                                     <div className="whitespace-pre-wrap">{product.description || 'مشخصاتی ثبت نشده است.'}</div>
+                                  ) : tab.id === 'review' ? (
+                                    <div className="whitespace-pre-wrap">{product.details || 'نقد و بررسی ثبت نشده است.'}</div>
                                   ) : (
                                      <p>محتوای {tab.label} در این بخش نمایش داده می‌شود.</p>
                                   )}
@@ -338,23 +314,20 @@ export default function ProductDetail({
                      {activeTab === 'specs' && (
                        <div className="space-y-8">
                          <h3 className="text-lg font-black text-gray-800">مشخصات فنی</h3>
-                         <div className="grid grid-cols-1 gap-1">
-                            {[
-                              { label: 'حافظه داخلی', value: '۲۵۶ گیگابایت' },
-                              { label: 'مقدار RAM', value: '۱۲ گیگابایت' },
-                              { label: 'رزولوشن عکس', value: '۲۰۰ مگاپیکسل' },
-                              { label: 'اندازه صفحه نمایش', value: '۶.۸ اینچ' },
-                              { label: 'تعداد سیم کارت', value: 'دو عدد' },
-                            ].map((item, i) => (
-                              <div key={i} className="flex border-b border-gray-50 py-4 group">
-                                 <div className="w-1/3 text-gray-400 font-bold text-xs">{item.label}</div>
-                                 <div className="flex-grow text-gray-800 font-black text-sm">{item.value}</div>
-                              </div>
-                            ))}
+                         <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                           {product.description || 'مشخصاتی برای این محصول ثبت نشده است.'}
                          </div>
                        </div>
                      )}
-                     {activeTab !== 'specs' && (
+                     {activeTab === 'review' && (
+                       <div className="space-y-8">
+                         <h3 className="text-lg font-black text-gray-800">نقد و بررسی</h3>
+                         <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                           {product.details || 'نقد و بررسی برای این محصول ثبت نشده است.'}
+                         </div>
+                       </div>
+                     )}
+                     {(activeTab !== 'specs' && activeTab !== 'review') && (
                        <p className="text-center py-20 text-gray-400 font-bold">محتوای {TABS.find(t => t.id === activeTab)?.label} در حال بارگذاری است...</p>
                      )}
                    </motion.div>

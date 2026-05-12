@@ -25,7 +25,8 @@ export default function Header({
   onWishlistClick,
   onUserClick,
   onMenuClick,
-  wishlistCount = 0
+  wishlistCount = 0,
+  user
 }: { 
   onLogoClick?: () => void; 
   cartCount?: number;
@@ -35,9 +36,12 @@ export default function Header({
   onUserClick?: () => void;
   onMenuClick?: () => void;
   wishlistCount?: number;
+  user?: any;
 }) {
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const categoriesRef = useRef<HTMLDivElement>(null);
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -53,7 +57,7 @@ export default function Header({
     <header className="sticky top-0 left-0 right-0 z-[40] bg-white font-sans w-full shadow-[0_1px_4px_rgba(0,0,0,0.12)] md:shadow-none">
       {/* Top bar - Hidden on mobile */}
       <div className="hidden md:block bg-[#F0F0F1] text-gray-500 text-[10px] md:text-xs py-2 px-4 border-b border-gray-100">
-        <div className="container !max-w-none mx-auto flex justify-between items-center px-4 lg:px-12">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex justify-between items-center">
           <div className="font-semibold">به متین‌کالا خوش آمدید</div>
           <div className="flex items-center gap-6 font-semibold">
             <a href="#" className="hover:text-gray-900 transition-colors">فروش در متین‌کالا</a>
@@ -65,7 +69,7 @@ export default function Header({
 
       {/* Main header row */}
       <div className="bg-white h-[56px] px-3 md:px-0 md:h-[80px] border-b border-white md:border-gray-100 relative z-10 w-full flex items-center">
-        <div className="container !max-w-none mx-auto flex items-center justify-between w-full px-4 lg:px-12">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between w-full">
           
           {/* MOBILE LAYOUT CONTENT */}
           <div className="flex items-center justify-between w-full md:hidden h-full">
@@ -117,7 +121,7 @@ export default function Header({
           {/* DESKTOP LAYOUT CONTENT */}
           <div className="hidden md:flex items-center h-full w-full justify-between">
             {/* Right Side: Logo and Search */}
-            <div className="flex items-center gap-4 lg:gap-8 min-w-0 pr-2 lg:pr-4">
+            <div className="flex items-center gap-2 lg:gap-4 min-w-0 pr-0 lg:pr-2">
               <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
                 <div className="text-[#EF2020] text-3xl lg:text-4xl font-black italic tracking-tighter">
                   MATINKALA
@@ -142,10 +146,21 @@ export default function Header({
             <div className="flex items-center gap-2 lg:gap-4 shrink-0 pr-4">
               <button 
                 onClick={onUserClick}
-                className="flex items-center gap-2 text-gray-700 hover:bg-gray-50 border border-gray-200 px-3 lg:px-4 py-2 rounded-xl text-sm font-black transition-all"
+                className={`flex items-center gap-2 text-gray-700 hover:bg-gray-50 border border-gray-200 px-3 lg:px-4 py-2 rounded-xl text-sm font-black transition-all ${user ? 'pl-5' : ''}`}
               >
-                <User className="w-5 h-5" />
-                <span className="whitespace-nowrap">ورود | ثبت‌نام</span>
+                {user ? (
+                  <div className="flex items-center gap-2 lg:gap-3">
+                    <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 shrink-0">
+                      <User className="w-4 h-4 lg:w-5 lg:h-5 text-gray-400" />
+                    </div>
+                    <span className="max-w-[80px] lg:max-w-[150px] truncate text-[11px] lg:text-sm">{userName}</span>
+                  </div>
+                ) : (
+                  <>
+                    <User className="w-5 h-5" />
+                    <span className="whitespace-nowrap">ورود | ثبت‌نام</span>
+                  </>
+                )}
               </button>
 
               <div className="w-px bg-gray-200 h-6 mx-1 lg:mx-2" />
@@ -190,7 +205,7 @@ export default function Header({
 
       {/* Nav Row - Hidden on mobile */}
       <div className="hidden md:block bg-white px-4 border-b border-gray-100">
-        <div className="container !max-w-none mx-auto flex items-center h-[40px] justify-start px-4 lg:px-12">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex items-center h-[40px] justify-start">
           <div 
             ref={categoriesRef}
             className="relative shrink-0 h-full"
@@ -250,8 +265,8 @@ export default function Header({
                 </div>
             </div>
           </div>
-          <nav className="flex items-center gap-6 lg:gap-10 h-full px-6 lg:px-8">
-            {['شگفت‌انگیزها', 'سوپرمارکت', 'کارت هدیه', 'پرفروش‌ترین‌ها', 'تخفیف‌ها'].map((link) => (
+          <nav className="flex items-center gap-4 lg:gap-8 h-full px-4 lg:px-6">
+            {['شگفت‌انگیز', 'سوپرمارکت', 'کارت هدیه', 'پرفروش‌ترین‌ها', 'تخفیف‌ها'].map((link) => (
               <a key={link} href="#" className="text-[11px] font-bold text-gray-600 hover:text-[#EF2020] transition-colors relative group h-full flex items-center">
                  <span>{link}</span>
                  <span className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#EF2020] scale-x-0 group-hover:scale-x-100 transition-transform origin-right"></span>

@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Heart, Star, Truck, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface ProductCardProps {
+  key?: React.Key;
   id: number;
   title: string;
   image: string;
@@ -49,13 +50,13 @@ export default function ProductCard({
 
   return (
     <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
+      whileHover={{ y: -6, scale: 1.01 }}
       onClick={() => onProductClick?.(id)}
-      className="w-full bg-white rounded-lg p-1.5 md:p-2 transition-all duration-200 cursor-pointer flex flex-col relative group"
-      style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+      className="w-full bg-white rounded-lg p-1.5 md:p-2 transition-all duration-300 cursor-pointer flex flex-col relative group/card"
+      style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
     >
       {/* 1. Image Area */}
-      <div className="relative w-full h-[150px] md:h-[200px] bg-[#F5F5F5] rounded-md overflow-hidden flex items-center justify-center p-2 md:p-4">
+      <div className="relative w-full h-[150px] md:h-[200px] bg-[#F5F5F5] rounded-md flex items-center justify-center p-2 md:p-4">
         {/* Wishlist Heart Icon */}
         <button 
           onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(); }}
@@ -73,7 +74,7 @@ export default function ProductCard({
            </div>
         )}
 
-        {discountPercentage && inStock && (
+        {(discountPercentage ?? 0) > 0 && inStock && (
           <div className="absolute bottom-2 right-2 z-20 bg-[#EF2020] text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
             {discountPercentage}٪
           </div>
@@ -82,7 +83,7 @@ export default function ProductCard({
         <img
           src={image}
           alt={title}
-          className={`w-full h-full object-contain mix-blend-multiply transition-transform duration-500 ${inStock ? 'group-hover:scale-110' : 'grayscale opacity-50'}`}
+          className={`w-full h-full object-contain mix-blend-multiply transition-transform duration-500 ${inStock ? 'group-hover/card:scale-105 group-hover/card:-translate-y-0.5' : 'grayscale opacity-50'}`}
           referrerPolicy="no-referrer"
         />
       </div>
@@ -115,16 +116,16 @@ export default function ProductCard({
         <div className="mt-auto flex flex-col items-end gap-1 min-h-[45px]">
           {inStock ? (
             <>
-              {oldPrice && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-gray-400 line-through decoration-red-400">
-                    {oldPrice.toLocaleString()}
-                  </span>
-                  <div className="bg-[#EF2020]/10 text-[#EF2020] text-[9px] font-black px-1.5 py-0.5 rounded-full">
-                    {discountPercentage}٪
-                  </div>
-                </div>
-              )}
+        {(oldPrice ?? 0) > 0 && (discountPercentage ?? 0) > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-gray-400 line-through decoration-red-400">
+              {oldPrice?.toLocaleString()}
+            </span>
+            <div className="bg-[#EF2020]/10 text-[#EF2020] text-[9px] font-black px-1.5 py-0.5 rounded-full">
+              {discountPercentage}٪
+            </div>
+          </div>
+        )}
               <div className="flex items-center gap-1">
                 <span className="text-base font-black text-gray-900">{price.toLocaleString()}</span>
                 <span className="text-[10px] font-bold text-gray-500">تومان</span>

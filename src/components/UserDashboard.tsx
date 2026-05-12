@@ -15,24 +15,31 @@ import { ALL_PRODUCTS } from '../data';
 import { ProductData } from '../types';
 import { isSupabaseConfigured } from '../lib/supabase';
 
-type DashboardSection = 'orders' | 'wishlist' | 'wallet' | 'addresses' | 'comments' | 'notifications' | 'account';
+type DashboardSection = 'orders' | 'wishlist' | 'wallet' | 'addresses' | 'comments' | 'notifications' | 'account' | 'admin';
 
 export default function UserDashboard({ 
   onClose,
   wishlist = [],
   onToggleWishlist,
   onAddToCart,
-  onProductClick
+  onProductClick,
+  onLogin,
+  onLogout,
+  onProductChange
 }: { 
   onClose: () => void;
   wishlist: number[];
   onToggleWishlist: (id: number) => void;
   onAddToCart: (p: ProductData) => void;
   onProductClick: (id: number) => void;
+  onLogin?: (u: any) => void;
+  onLogout?: () => void;
+  onProductChange?: () => void;
 }) {
   const [activeSection, setActiveSection] = useState<DashboardSection>('orders');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,10 +78,24 @@ export default function UserDashboard({
   }, []);
 
   const checkUser = async () => {
+    // Check local admin first
+    const savedUser = localStorage.getItem('matinkala_user');
+    if (savedUser) {
+      const u = JSON.parse(savedUser);
+      setUser(u);
+      onLogin?.(u); // Sync with App
+      if (u.email === 'admin@matinkala.com') {
+        setIsAdmin(true);
+      }
+    }
+
     try {
       const { supabaseService } = await import('../services/supabaseService');
       const currentUser = await supabaseService.getCurrentUser();
-      if (currentUser) setUser(currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+        onLogin?.(currentUser);
+      }
     } catch (err) {
       console.error('Error checking user:', err);
     }
@@ -110,6 +131,21 @@ export default function UserDashboard({
       setLoading(true);
       setErrorMessage('');
       setSuccessMessage('');
+
+      // Special Admin Check
+      if (email === 'MZM' && password === '1326') {
+        const adminUser = {
+          email: 'admin@matinkala.com',
+          user_metadata: { full_name: 'مدیر' }
+        };
+        setUser(adminUser);
+        setIsAdmin(true);
+        onLogin?.(adminUser);
+        setActiveSection('admin');
+        setLoading(false);
+        return;
+      }
+
       const { supabaseService } = await import('../services/supabaseService');
       
       if (authMode === 'signup') {
@@ -126,6 +162,7 @@ export default function UserDashboard({
         const data = await supabaseService.signInWithEmail(email, password);
         if (data?.user) {
           setUser(data.user);
+          onLogin?.(data.user);
         }
       }
     } catch (err: any) {
@@ -154,6 +191,9 @@ export default function UserDashboard({
       setLoading(true);
       const { supabaseService } = await import('../services/supabaseService');
       await supabaseService.signOut();
+      onLogout?.();
+      setUser(null);
+      setIsAdmin(false);
       onClose();
     } catch (err) {
       console.error('Logout error:', err);
@@ -166,6 +206,7 @@ export default function UserDashboard({
     { id: 'orders', label: 'سفارش‌های من', icon: Package },
     { id: 'wishlist', label: 'علاقه‌مندی‌ها', icon: Heart },
     { id: 'wallet', label: 'کیف پول متین‌پی', icon: Wallet },
+    ...(isAdmin ? [{ id: 'admin', label: 'پنل مدیریت', icon: ShieldCheck }] : []),
     { id: 'addresses', label: 'آدرس‌های من', icon: MapPin },
     { id: 'comments', label: 'نظرات من', icon: MessageSquare },
     { id: 'notifications', label: 'اعلان‌ها', icon: Bell },
@@ -243,7 +284,7 @@ export default function UserDashboard({
                 <div className="relative">
                   <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input 
-                    type="email"
+                    type="text"
                     placeholder="ایمیل"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -411,7 +452,8 @@ export default function UserDashboard({
               />
             )}
             {activeSection === 'wallet' && <WalletSection key="wallet" />}
-            {(activeSection !== 'orders' && activeSection !== 'wishlist' && activeSection !== 'wallet') && (
+            {activeSection === 'admin' && <AdminSection key="admin" onProductChange={onProductChange} />}
+            {(activeSection !== 'orders' && activeSection !== 'wishlist' && activeSection !== 'wallet' && activeSection !== 'admin') && (
               <motion.div 
                 key="empty"
                 initial={{ opacity: 0, y: 20 }}
@@ -432,7 +474,559 @@ export default function UserDashboard({
   );
 }
 
-function OrdersSection() {
+function AdminSection({ onProductChange, key }: { onProductChange?: () => void, key?: React.Key }) {
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const [editingId, setEditingId] = useState<number | null>(null);
+  
+  // New Product State
+  const [newProduct, setNewProduct] = useState<Partial<ProductData>>({
+    title: '',
+    price: 0,
+    oldPrice: 0,
+    discountPercentage: 0,
+    quantity: 0,
+    description: '',
+    details: '',
+    category: 'موبایل',
+    promo_type: 'normal',
+    inStock: true,
+    rating: 5,
+    reviewCount: 0,
+    image: '',
+    images: []
+  });
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { supabaseService } = await import('../services/supabaseService');
+      const data = await supabaseService.getProducts();
+      setProducts(data);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (product: ProductData) => {
+    setEditingId(product.id);
+    setNewProduct({
+      title: product.title,
+      price: product.price,
+      oldPrice: product.oldPrice || 0,
+      discountPercentage: product.discountPercentage || 0,
+      quantity: product.quantity || 0,
+      description: product.description || '',
+      category: product.category || 'موبایل',
+      promo_type: product.promo_type || 'normal',
+      image: product.image,
+      images: product.images || []
+    });
+    setShowAddForm(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const { supabaseService } = await import('../services/supabaseService');
+      const uploadedUrls: string[] = [];
+      
+      for (const file of Array.from(files) as File[]) {
+        const url = await supabaseService.uploadProductImage(file);
+        uploadedUrls.push(url);
+      }
+
+      setNewProduct(prev => {
+        const updatedImages = [...(prev.images || []), ...uploadedUrls];
+        return {
+          ...prev,
+          image: updatedImages[0] || '',
+          images: updatedImages
+        };
+      });
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('خطا در آپلود تصویر');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProduct.title || !newProduct.price || !newProduct.image) {
+      alert('لطفا موارد ستاره‌دار را پر کنید');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { supabaseService } = await import('../services/supabaseService');
+      
+      // Data for Supabase
+      const productData = {
+        title: newProduct.title,
+        price: newProduct.price,
+        image: newProduct.image,
+        description: newProduct.description || '',
+        quantity: newProduct.quantity || 0,
+        category: newProduct.category,
+        promo_type: newProduct.promo_type,
+        discountPercentage: newProduct.promo_type === 'recommended' ? newProduct.discountPercentage : 0,
+        oldPrice: (newProduct.promo_type === 'recommended' && newProduct.discountPercentage)
+          ? Math.round(newProduct.price / (1 - newProduct.discountPercentage / 100))
+          : 0,
+        inStock: true,
+        rating: 5,
+        reviewCount: 0,
+        images: newProduct.images || []
+      };
+
+      if (editingId) {
+        try {
+          await supabaseService.updateProduct(editingId, productData as any);
+          alert('محصول با موفقیت ویرایش شد');
+        } catch (updateErr: any) {
+          if (updateErr.code === 'PGRST204' || (updateErr.message && updateErr.message.includes('column'))) {
+            const minimalProduct = {
+              title: newProduct.title,
+              price: newProduct.price,
+              image: newProduct.image,
+              description: newProduct.description || '',
+              quantity: newProduct.quantity || 0
+            };
+            await supabaseService.updateProduct(editingId, minimalProduct as any);
+            alert('محصول با موفقیت ویرایش شد، اما بعضی ستون‌ها در دیتابیس شما وجود ندارد.');
+          } else {
+            throw updateErr;
+          }
+        }
+      } else {
+        try {
+          await supabaseService.addProduct(productData as any);
+        } catch (insertErr: any) {
+          if (insertErr.code === 'PGRST204' || (insertErr.message && insertErr.message.includes('column'))) {
+            const minimalProduct = {
+              title: newProduct.title,
+              price: newProduct.price,
+              image: newProduct.image,
+              description: newProduct.description || '',
+              quantity: newProduct.quantity || 0
+            };
+            await supabaseService.addProduct(minimalProduct as any);
+            alert('محصول با موفقیت اضافه شد، اما بعضی ستون‌ها در دیتابیس شما وجود ندارد.');
+          } else {
+            throw insertErr;
+          }
+        }
+        alert('محصول با موفقیت اضافه شد');
+      }
+      
+      setShowAddForm(false);
+      setEditingId(null);
+      setNewProduct({
+        title: '',
+        price: 0,
+        oldPrice: 0,
+        discountPercentage: 0,
+        quantity: 0,
+        description: '',
+        details: '',
+        category: 'موبایل',
+        promo_type: 'normal',
+        inStock: true,
+        rating: 5,
+        reviewCount: 0,
+        image: '',
+        images: []
+      });
+      fetchProducts();
+      onProductChange?.();
+    } catch (err: any) {
+      console.error('Submit error:', err);
+      alert(`خطا: ${err.message || 'مشکل در ارتباط با دیتابیس'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const handleDelete = async (id: number) => {
+    // Immediate feedback
+    console.log('handleDelete requested for ID:', id);
+    
+    // Safety check - we avoid window.confirm as it crashes/blocks some environments
+    setDeletingId(id);
+  };
+
+  const confirmDelete = async (id: number) => {
+    setLoading(true);
+    setDeletingId(null);
+    try {
+      const { supabaseService } = await import('../services/supabaseService');
+      
+      console.log('Executing Supabase delete for ID:', id);
+      await supabaseService.deleteProduct(id);
+      
+      // Update local state immediately for better UX
+      setProducts(prev => prev.filter(p => p.id !== id));
+      
+      alert('محصول با موفقیت حذف شد');
+      
+      // Full refresh
+      await fetchProducts();
+      if (onProductChange) {
+        onProductChange();
+      }
+    } catch (err: any) {
+      console.error('Delete failed:', err);
+      // Detailed error message for the user to debug Supabase RLS/settings
+      alert(`خطا در حذف: ${err.message || 'مشکل در ارتباط با دیتابیس'}. ${err.code === '42501' ? 'احتمالا دسترسی حذف در Supabase تنظیم نشده است (RLS).' : ''}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stats = [
+    { label: 'کل فروش امروز', value: '۱۲,۴۰۰,۰۰۰ تومان', icon: ArrowUpRight, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'سفارش‌های جدید', value: '۲۴ عدد', icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'محصولات فعال', value: `${products.length} عدد`, icon: ShoppingCart, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: 'امنیت سیستم', value: 'برقرار', icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  ];
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat, i) => (
+          <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+            <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4`}>
+              <stat.icon className="w-6 h-6" />
+            </div>
+            <div className="text-gray-400 text-xs font-bold">{stat.label}</div>
+            <div className="text-lg font-black text-gray-900 mt-1">{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Admin Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Product Management */}
+        <div className="lg:col-span-2 bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <h4 className="font-black text-lg text-gray-900">مدیریت محصولات</h4>
+            <button 
+              onClick={() => {
+                if (showAddForm) {
+                  setShowAddForm(false);
+                  setEditingId(null);
+                } else {
+                  setNewProduct({
+                    title: '',
+                    price: 0,
+                    oldPrice: 0,
+                    discountPercentage: 0,
+                    quantity: 0,
+                    description: '',
+                    details: '',
+                    category: 'موبایل',
+                    promo_type: 'normal',
+                    image: '',
+                    images: []
+                  });
+                  setShowAddForm(true);
+                }
+              }}
+              className="flex items-center gap-2 bg-[#EF2020] text-white px-4 py-2 rounded-xl text-xs font-black"
+            >
+              <Plus className="w-4 h-4" />
+              {showAddForm ? 'بستن فرم' : 'افزودن محصول'}
+            </button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {showAddForm ? (
+              <motion.form 
+                key="form"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                onSubmit={handleSubmit}
+                className="space-y-6 overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 mr-2">نام محصول *</label>
+                    <input 
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200"
+                      value={newProduct.title}
+                      onChange={e => setNewProduct({...newProduct, title: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 mr-2">قیمت (تومان) *</label>
+                    <input 
+                      type="number"
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200"
+                      value={newProduct.price}
+                      onChange={e => setNewProduct({...newProduct, price: Number(e.target.value)})}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 mr-2">موجودی انبار *</label>
+                    <input 
+                      type="number"
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200"
+                      value={newProduct.quantity}
+                      onChange={e => setNewProduct({...newProduct, quantity: Number(e.target.value)})}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 mr-2">دسته‌بندی</label>
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200"
+                      value={newProduct.category}
+                      onChange={e => setNewProduct({...newProduct, category: e.target.value})}
+                    >
+                      <option value="موبایل">موبایل</option>
+                      <option value="لپ‌تاپ">لپ‌تاپ</option>
+                      <option value="هدفون">هدفون</option>
+                      <option value="ساعت هوشمند">ساعت هوشمند</option>
+                      <option value="تبلت">تبلت</option>
+                      <option value="کنسول بازی">کنسول بازی</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 mr-2">نوع نمایش محصول</label>
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200"
+                      value={newProduct.promo_type}
+                      onChange={e => setNewProduct({...newProduct, promo_type: e.target.value as any})}
+                    >
+                      <option value="normal">معمولی (فقط در داغ‌ترین‌ها)</option>
+                      <option value="special">ویژه (Incredible Offers)</option>
+                      <option value="recommended">پیشنهادی (Recommended Section)</option>
+                    </select>
+                  </div>
+                  {newProduct.promo_type === 'recommended' && (
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 mr-2">تخفیف (درصد)</label>
+                      <input 
+                        type="number"
+                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200"
+                        value={newProduct.discountPercentage}
+                        onChange={e => setNewProduct({...newProduct, discountPercentage: Number(e.target.value)})}
+                        min="0"
+                        max="100"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 mr-2">توضیحات کوتاه (جزئیات)</label>
+                  <textarea 
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200 min-h-[80px]"
+                    value={newProduct.details}
+                    onChange={e => setNewProduct({...newProduct, details: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 mr-2">توضیحات کامل</label>
+                  <textarea 
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-200 min-h-[120px]"
+                    value={newProduct.description}
+                    onChange={e => setNewProduct({...newProduct, description: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 mr-2">تصاویر (اولین تصویر به عنوان تصویر اصلی ذخیره می‌شود)</label>
+                  <div className="flex flex-wrap gap-3">
+                    {newProduct.images?.map((url, idx) => (
+                      <div key={idx} className={`w-20 h-20 rounded-xl border-2 overflow-hidden relative group ${newProduct.image === url ? 'border-[#EF2020]' : 'border-gray-100'}`}>
+                        <img src={url} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1 transition-opacity">
+                          <button 
+                            type="button"
+                            onClick={() => setNewProduct(prev => ({...prev, image: url}))}
+                            className="p-1 px-2 bg-white text-[8px] font-black rounded-lg hover:bg-[#EF2020] hover:text-white transition-colors"
+                          >
+                            اصلی
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => setNewProduct(prev => {
+                              const filtered = prev.images?.filter((_, i) => i !== idx) || [];
+                              return {
+                                ...prev,
+                                images: filtered,
+                                image: prev.image === url ? (filtered[0] || '') : prev.image
+                              };
+                            })}
+                            className="p-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <label className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-gray-50 transition-colors">
+                      {isUploading ? (
+                        <div className="w-4 h-4 border-2 border-[#EF2020] border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="w-5 h-5 text-gray-400" />
+                          <span className="text-[8px] font-black text-gray-400">آپلود</span>
+                        </>
+                      )}
+                      <input type="file" multiple className="hidden" onChange={handleImageUpload} disabled={isUploading} accept="image/*" />
+                    </label>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={loading || isUploading}
+                  className="w-full py-4 bg-[#EF2020] text-white rounded-2xl text-sm font-black hover:bg-red-600 transition-all disabled:opacity-50"
+                >
+                  {loading ? 'در حال ثبت...' : (editingId ? 'بروزرسانی محصول' : 'ثبت نهایی محصول')}
+                </button>
+              </motion.form>
+            ) : (
+              <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                {products.length === 0 ? (
+                  <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                    <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <div className="text-sm font-black text-gray-400">هنوز هیچ محصولی ثبت نشده است</div>
+                  </div>
+                ) : (
+                  products.map(p => (
+                    <div key={p.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-3xl group">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                          <img src={p.image} className="w-full h-full object-contain" />
+                        </div>
+                        <div>
+                          <div className="text-xs lg:text-sm font-black text-gray-800 line-clamp-1">{p.title}</div>
+                          <div className="flex items-center gap-4 mt-1">
+                            <div className="text-[10px] text-gray-400 font-bold">موجودی: {p.quantity || 0} عدد</div>
+                            <div className="text-[10px] text-blue-600 font-black">{p.price.toLocaleString()} تومان</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          type="button"
+                          onClick={() => handleEdit(p)}
+                          className="px-4 py-2 text-xs font-black text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all border border-blue-100 shadow-sm"
+                        >
+                          ویرایش
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (p.id) {
+                              handleDelete(p.id);
+                            } else {
+                              alert('شناسه محصول وجود ندارد');
+                            }
+                          }}
+                          className="w-10 h-10 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-100 shadow-sm cursor-pointer"
+                          title="حذف محصول"
+                        >
+                          <X className="w-5 h-5 pointer-events-none" strokeWidth={3} />
+                        </button>
+                        
+                        {/* Confirmation Overlay for individual product */}
+                        {deletingId === p.id && (
+                          <div className="absolute inset-0 bg-white/95 backdrop-blur-sm z-[100] flex flex-col items-center justify-center gap-2 p-2 rounded-2xl border-2 border-red-100">
+                            <span className="text-[10px] font-black text-gray-900 text-center">مطمئنید؟</span>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => confirmDelete(p.id)}
+                                className="px-3 py-1 bg-red-600 text-white text-[9px] font-black rounded-lg hover:bg-red-700 shadow-sm"
+                              >
+                                بله، حذف شود
+                              </button>
+                              <button 
+                                onClick={() => setDeletingId(null)}
+                                className="px-3 py-1 bg-gray-100 text-gray-600 text-[9px] font-black rounded-lg hover:bg-gray-200"
+                              >
+                                انصراف
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Sys Info */}
+        <div className="space-y-6">
+          <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
+            <h4 className="font-black text-lg text-gray-900 mb-6">وضعیت سیستم</h4>
+            <div className="space-y-4">
+               <div className="p-6 border border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center text-center">
+                 <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4" />
+                 <div className="text-sm font-black text-gray-800">امنیت سیستم برقرار است</div>
+                 <p className="text-[10px] text-gray-400 font-bold mt-2 leading-relaxed">
+                   آخرین بررسی امنیتی: ۱۰ دقیقه پیش
+                   <br />
+                   دیتابیس سوپابیس متصل و پایدار است.
+                 </p>
+               </div>
+               <div className="space-y-2">
+                 <div className="flex justify-between items-center text-[10px] font-black">
+                   <span className="text-gray-400">استفاده از فضا</span>
+                   <span className="text-gray-900">۱۲٪</span>
+                 </div>
+                 <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
+                   <div className="w-[12%] h-full bg-blue-500 rounded-full" />
+                 </div>
+               </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-[40px] text-white shadow-xl shadow-gray-200">
+            <h4 className="font-black text-lg mb-4">نیاز به راهنمایی؟</h4>
+            <p className="text-xs text-gray-400 leading-loose mb-6 font-bold">
+              برای مدیریت دیتابیس و تنظیمات پیشرفته، می‌توانید از پنل اصلی سوپابیس استفاده کنید.
+            </p>
+            <button className="w-full py-3 bg-white text-black rounded-2xl text-xs font-black hover:bg-gray-100 transition-all">
+              ورود به پنل سوپابیس
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function OrdersSection({ key }: { key?: React.Key }) {
   const [activeTab, setActiveTab] = useState('all');
   const tabs = [
     { id: 'all', label: 'همه' },
@@ -512,7 +1106,7 @@ function OrdersSection() {
   );
 }
 
-function WalletSection() {
+function WalletSection({ key }: { key?: React.Key }) {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
       {/* Balance Card */}
@@ -604,12 +1198,14 @@ function WishlistSection({
   wishlist, 
   onToggleWishlist, 
   onAddToCart,
-  onProductClick
+  onProductClick,
+  key
 }: { 
   wishlist: number[]; 
   onToggleWishlist: (id: number) => void;
   onAddToCart: (p: ProductData) => void;
   onProductClick: (id: number) => void;
+  key?: React.Key;
 }) {
   const wishlistItems = ALL_PRODUCTS.filter(p => wishlist.includes(p.id));
 

@@ -44,7 +44,7 @@ export const supabaseService = {
     return data;
   },
 
-  async verifyOtp(email: string, token: string, type: 'email' | 'signup' | 'recovery' | 'invite' | 'reauthentication' = 'email') {
+  async verifyOtp(email: string, token: string, type: any = 'email') {
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token,
@@ -60,7 +60,7 @@ export const supabaseService = {
     return data;
   },
 
-  async resend(email: string, type: 'signup' | 'recovery' | 'invite' | 'reauthentication' | 'email_change') {
+  async resend(email: string, type: any) {
     const { data, error } = await supabase.auth.resend({
       type,
       email,
@@ -91,13 +91,64 @@ export const supabaseService = {
   async getProducts(): Promise<ProductData[]> {
     const { data, error } = await supabase
       .from('products')
-      .select('*');
+      .select('*')
+      .order('id', { ascending: false });
     
     if (error) {
-      console.warn('Error fetching from Supabase, falling back to local data:', error);
-      return []; // You can return local data here if you want
+      console.error('Supabase fetch error:', error);
+      throw error;
     }
     return data || [];
+  },
+
+  async addProduct(product: Omit<ProductData, 'id'>) {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([product])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updateProduct(id: number, product: Partial<ProductData>) {
+    const { data, error } = await supabase
+      .from('products')
+      .update(product)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteProduct(id: number) {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  },
+
+  async uploadProductImage(file: File) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `product-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
   },
 
   // Wishlist Sync (example)

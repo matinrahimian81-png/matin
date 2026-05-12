@@ -51,7 +51,7 @@ export default function MobileDrawer({
           >
             {/* Header */}
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <div className="text-[#EF2020] text-xl font-black italic">DIGIKALA</div>
+              <div className="text-[#EF2020] text-xl font-black italic">MATINKALA</div>
               <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
                 <X className="w-6 h-6 text-gray-500" />
               </button>
