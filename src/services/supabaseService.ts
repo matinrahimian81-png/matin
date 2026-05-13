@@ -151,6 +151,66 @@ export const supabaseService = {
     return data.publicUrl;
   },
 
+  // Slider Management
+  async getSlides() {
+    const { data, error } = await supabase
+      .from('slides')
+      .select('*')
+      .order('order_index', { ascending: true });
+    
+    if (error) return [];
+    return data || [];
+  },
+
+  async addSlide(slide: any) {
+    const { data, error } = await supabase
+      .from('slides')
+      .insert([slide])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updateSlide(id: number, slide: Partial<any>) {
+    const { data, error } = await supabase
+      .from('slides')
+      .update(slide)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteSlide(id: number) {
+    const { error } = await supabase
+      .from('slides')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  },
+
+  async uploadSliderImage(file: File | Blob) {
+    const fileName = `${Math.random()}.jpg`;
+    const filePath = `slider-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  },
+
   // Wishlist Sync (example)
   async syncWishlist(userId: string, productIds: number[]) {
     const { error } = await supabase

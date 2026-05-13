@@ -20,3 +20,19 @@ export interface ProductData {
 export interface CartItem extends ProductData {
   quantity: number;
 }
+
+export interface Slide {
+  id: number;
+  image: string;
+  title: string;
+  subtitle?: string;
+  button_text?: string;
+  button_link?: string;
+  button_pos_x?: number; // 0 to 100
+  button_pos_y?: number; // 0 to 100
+  button_width?: number; // width in %
+  button_height?: number; // height in %
+  button_scale?: number;
+  product_id?: number | null;
+  order_index: number;
+}

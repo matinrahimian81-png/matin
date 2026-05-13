@@ -336,9 +336,9 @@ export default function App() {
         {!selectedProductId ? (
           <motion.main 
             key="home"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="pb-12"
           >
             {searchTerm ? (
@@ -366,7 +366,7 @@ export default function App() {
               </section>
             ) : (
               <>
-                <Hero />
+                <Hero onProductClick={setSelectedProductId} />
                 <CategoryIcons />
                 <IncredibleOffers 
                   products={activeProducts}

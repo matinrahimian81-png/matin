@@ -36,11 +36,12 @@ export default function IncredibleOffers({
   const scrollRef2 = useRef<HTMLDivElement>(null);
 
   // Filter products for different sections
-  const incredibleOffers = products.filter(p => (p.discountPercentage ?? 0) > 0).slice(0, 10);
-  const displayIncredible = incredibleOffers.length > 0 ? incredibleOffers : products.slice(0, 10);
-  
-  const specialOffersList = products.filter(p => p.promo_type === 'special').slice(0, 10);
-  const displaySpecial = specialOffersList.length > 0 ? specialOffersList : [...products].reverse().slice(0, 10);
+  const displayIncredible = products.filter(p => p.promo_type === 'recommended').slice(0, 10);
+  const displaySpecial = products.filter(p => p.promo_type === 'special').slice(0, 10);
+
+  // Fallback if specific types are empty (mostly for initial setup/empty database)
+  const finalIncredible = displayIncredible.length > 0 ? displayIncredible : products.filter(p => (p.discountPercentage ?? 0) > 0).slice(0, 10);
+  const finalSpecial = displaySpecial.length > 0 ? displaySpecial : [...products].reverse().slice(0, 10).filter(p => p.promo_type === 'special' || !p.promo_type);
 
   const scroll = (ref: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
     if (ref.current) {
@@ -51,7 +52,7 @@ export default function IncredibleOffers({
   };
 
   return (
-    <div className="container !max-w-none mx-auto px-2 md:px-4 lg:px-12 space-y-8 md:space-y-16 py-6 md:py-12">
+    <div className="container !max-w-none mx-auto px-4 lg:px-12 space-y-8 md:space-y-16 py-6 md:py-12">
       {/* 1. Flash Sale Banner ("شگفت انگیز") */}
       <section className="relative rounded-[20px] md:rounded-[40px] overflow-hidden p-1 shadow-2xl bg-[#EF2020]">
         <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-12 p-4 md:p-8 lg:p-12">
@@ -89,13 +90,13 @@ export default function IncredibleOffers({
              {/* Navigation Buttons - Positioned middle of the image area, ultra transparent on mobile */}
              <button 
                onClick={(e) => { e.stopPropagation(); scroll(scrollRef1, 'right'); }}
-               className="absolute right-0 md:right-1 top-[30%] -translate-y-1/2 z-30 bg-white/5 backdrop-blur-md p-1.5 md:p-4 rounded-full shadow-sm text-gray-800 hover:bg-white transition-all lg:opacity-0 lg:group-hover/carousel:opacity-100 border border-white/10"
+               className="absolute right-0 md:right-1 top-[50%] -translate-y-1/2 z-30 bg-white/5 backdrop-blur-md p-1.5 md:p-4 rounded-full shadow-sm text-gray-800 hover:bg-white transition-all lg:opacity-0 lg:group-hover/carousel:opacity-100 border border-white/10"
              >
                <ChevronRight className="w-3.5 h-3.5 md:w-6 md:h-6" />
              </button>
              <button 
                onClick={(e) => { e.stopPropagation(); scroll(scrollRef1, 'left'); }}
-               className="absolute left-0 md:left-1 top-[30%] -translate-y-1/2 z-30 bg-white/5 backdrop-blur-md p-1.5 md:p-4 rounded-full shadow-sm text-gray-800 hover:bg-white transition-all lg:opacity-0 lg:group-hover/carousel:opacity-100 border border-white/10"
+               className="absolute left-0 md:left-1 top-[50%] -translate-y-1/2 z-30 bg-white/5 backdrop-blur-md p-1.5 md:p-4 rounded-full shadow-sm text-gray-800 hover:bg-white transition-all lg:opacity-0 lg:group-hover/carousel:opacity-100 border border-white/10"
              >
                <ChevronLeft className="w-3.5 h-3.5 md:w-6 md:h-6" />
              </button>
@@ -104,12 +105,12 @@ export default function IncredibleOffers({
                ref={scrollRef1}
                className="flex gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-4 md:pb-8 pt-4 px-1 md:px-2 scroll-smooth"
              >
-                {displayIncredible.map((product) => (
+                {finalIncredible.map((product) => (
                   <motion.div
                     key={product.id}
                     whileHover={{ y: -6, scale: 1.01 }}
                     onClick={() => onProductClick?.(product.id)}
-                    className="min-w-[160px] md:min-w-[220px] bg-white rounded-2xl md:rounded-3xl p-3 md:p-5 flex flex-col gap-2 md:gap-3 cursor-pointer relative shadow-lg h-[320px] md:h-[400px] group/item"
+                    className="min-w-[75%] md:min-w-[220px] bg-white rounded-2xl md:rounded-3xl p-3 md:p-5 flex flex-col gap-2 md:gap-3 cursor-pointer relative shadow-lg h-[320px] md:h-[400px] group/item"
                   >
                     {/* Heart Button */}
                     <button 
@@ -167,44 +168,44 @@ export default function IncredibleOffers({
 
       {/* 2. Special Offers Section */}
       <section className="bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-2xl shadow-black/5">
-        <div className="bg-[#EF2020] px-10 py-6 flex flex-col md:flex-row items-center justify-between text-white gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-               <Clock className="w-6 h-6" />
+        <div className="bg-[#EF2020] px-4 md:px-10 py-5 md:py-6 flex flex-row items-center justify-between text-white gap-2 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
+            <div className="hidden xs:flex w-8 h-8 md:w-10 md:h-10 bg-white/20 rounded-xl items-center justify-center">
+               <Clock className="w-4 h-4 md:w-6 md:h-6" />
             </div>
-            <h3 className="text-2xl font-black">پیشنهادات ویژه</h3>
+            <h3 className="text-base md:text-2xl font-black whitespace-nowrap">پیشنهادات ویژه</h3>
           </div>
 
-          <div className="flex items-center gap-10">
-             <div className="flex items-center gap-2" dir="ltr">
+          <div className="flex items-center gap-2 md:gap-10 shrink-0">
+             <div className="hidden sm:flex items-center gap-1 md:gap-2 flex-nowrap" dir="ltr">
                 <CountdownBox label={countdown.h} dark />
-                <span className="font-bold">:</span>
+                <span className="font-bold text-white">:</span>
                 <CountdownBox label={countdown.m} dark />
-                <span className="font-bold">:</span>
+                <span className="font-bold text-white">:</span>
                 <CountdownBox label={countdown.s} dark />
              </div>
              
              <button 
-               onClick={() => onProductClick?.(displaySpecial[0]?.id)}
-               className="flex items-center gap-3 text-base font-black bg-white text-[#EF2020] px-8 py-3 rounded-2xl hover:bg-gray-50 transition-all shadow-xl shadow-black/10 group"
+                onClick={() => onProductClick?.(displaySpecial[0]?.id)}
+                className="flex items-center gap-1 md:gap-3 text-xs md:text-base font-black bg-white text-[#EF2020] px-3 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl hover:bg-gray-50 transition-all shadow-xl shadow-black/10 group flex-nowrap shrink-0"
              >
-                <span>مشاهده همه</span>
-                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                <span className="whitespace-nowrap">مشاهده همه</span>
+                <ChevronLeft className="w-3.5 h-3.5 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform shrink-0" />
              </button>
           </div>
         </div>
         
-        <div className="p-10 relative group/carousel2">
-          {/* Navigation Arrows - Adjusted for better visibility and text clearance */}
+        <div className="p-6 md:p-10 relative group/carousel2">
+          {/* Navigation Arrows - Precisely centered and medium sized */}
           <button 
             onClick={(e) => { e.stopPropagation(); scroll(scrollRef2, 'right'); }}
-            className="absolute right-1 md:right-2 top-[25%] bg-white/5 backdrop-blur-md shadow-sm p-1.5 md:p-4 rounded-full text-gray-800 lg:opacity-0 lg:group-hover/carousel2:opacity-100 transition-all hover:bg-white border border-white/10 z-20"
+            className="absolute right-1 md:right-3 top-[50%] -translate-y-1/2 bg-white/5 backdrop-blur-md shadow-sm p-1.5 md:p-4 rounded-full text-gray-800 lg:opacity-0 lg:group-hover/carousel2:opacity-100 transition-all hover:bg-white border border-white/10 z-20"
           >
              <ChevronRight className="w-3.5 h-3.5 md:w-6 md:h-6" />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); scroll(scrollRef2, 'left'); }}
-            className="absolute left-1 md:left-2 top-[25%] bg-white/5 backdrop-blur-md shadow-sm p-1.5 md:p-4 rounded-full text-gray-800 lg:opacity-0 lg:group-hover/carousel2:opacity-100 transition-all hover:bg-white border border-white/10 z-20"
+            className="absolute left-1 md:left-3 top-[50%] -translate-y-1/2 bg-white/5 backdrop-blur-md shadow-sm p-1.5 md:p-4 rounded-full text-gray-800 lg:opacity-0 lg:group-hover/carousel2:opacity-100 transition-all hover:bg-white border border-white/10 z-20"
           >
              <ChevronLeft className="w-3.5 h-3.5 md:w-6 md:h-6" />
           </button>
@@ -213,12 +214,12 @@ export default function IncredibleOffers({
             ref={scrollRef2}
             className="flex gap-6 md:gap-10 overflow-x-auto no-scrollbar scroll-smooth"
           >
-            {displaySpecial.map((product) => (
+            {finalSpecial.map((product) => (
               <motion.div 
                 key={product.id} 
                 whileHover={{ y: -6, scale: 1.01 }}
                 onClick={() => onProductClick?.(product.id)}
-                className="min-w-[160px] md:min-w-[220px] flex flex-col gap-3 cursor-pointer group/itemSpecial"
+                className="min-w-[75%] md:min-w-[220px] flex flex-col gap-3 cursor-pointer group/itemSpecial"
               >
                 <div className="h-[160px] md:h-[220px] bg-gray-50 rounded-[24px] md:rounded-[32px] p-4 md:p-6 relative border-2 border-transparent hover:border-[#EF2020]/20 transition-all shadow-sm flex items-center justify-center">
                    <img 

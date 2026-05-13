@@ -21,7 +21,12 @@ export default function DetailedProductSection({
   onToggleWishlist?: (id: number) => void;
 }) {
   if (products.length === 0) return null;
-  const activeProducts = products;
+  
+  // Prioritize normal products for the general "Hottest/Newest" section
+  const normalProducts = products.filter(p => p.promo_type === 'normal' || !p.promo_type);
+  const otherProducts = products.filter(p => p.promo_type === 'recommended' || p.promo_type === 'special');
+  
+  const activeProducts = normalProducts.length > 0 ? [...normalProducts, ...otherProducts] : products;
 
   return (
     <section className="max-w-[1440px] mx-auto px-4 md:px-8 py-8 md:py-12">
