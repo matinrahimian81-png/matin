@@ -62,7 +62,11 @@ export default function Hero({ onProductClick }: { onProductClick?: (id: number)
   const prev = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
 
   if (loading) {
-    return <div className="w-full h-[200px] md:h-[400px] bg-gray-100 animate-pulse rounded-3xl" />;
+    return (
+      <div className="w-full mt-0 pt-0 mb-4 md:mb-8">
+        <div className="w-full aspect-[21/7] bg-gray-100 animate-pulse" />
+      </div>
+    );
   }
 
   if (slides.length === 0) {
@@ -73,8 +77,8 @@ export default function Hero({ onProductClick }: { onProductClick?: (id: number)
   const currentSlide = slides[current];
 
   return (
-    <div className="w-full mt-0 pt-0">
-      <section className="relative w-full aspect-[21/9] h-auto overflow-hidden group">
+    <div className="w-full mt-0 pt-0 mb-6 md:mb-10">
+      <section className="relative w-full aspect-[21/7] h-auto overflow-hidden group border-b border-gray-100 shadow-md">
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
@@ -118,18 +122,11 @@ export default function Hero({ onProductClick }: { onProductClick?: (id: number)
               </motion.p>
             </div>
 
-            {/* Invisible Hotspot / Rectangle Portion - Synchronized with Editor */}
+            {/* Full-slider Clickable Area if product linked */}
             {currentSlide.product_id && (
-              <motion.div
-                whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                onClick={() => currentSlide.product_id && onProductClick?.(currentSlide.product_id)}
-                className="absolute cursor-pointer pointer-events-auto border border-white/0 hover:border-white/10 transition-colors z-30"
-                style={{
-                  right: `${currentSlide.button_pos_x}%`,
-                  top: `${currentSlide.button_pos_y}%`,
-                  width: `${currentSlide.button_width || 15}%`,
-                  height: `${currentSlide.button_height || 10}%`,
-                }}
+              <div
+                onClick={() => onProductClick?.(currentSlide.product_id)}
+                className="absolute inset-0 cursor-pointer z-30"
               />
             )}
           </motion.div>
@@ -139,20 +136,22 @@ export default function Hero({ onProductClick }: { onProductClick?: (id: number)
       {slides.length > 1 && (
         <>
           <button
-            onClick={next}
-            className="flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-white/30 md:bg-white/20 backdrop-blur-md p-2 md:p-3 rounded-full text-white lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-white/40 z-20"
+            onClick={prev}
+            className="flex absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/30 md:bg-white/20 backdrop-blur-md p-2.5 md:p-4 rounded-full text-white lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-white/40 z-20"
           >
             <ChevronLeft className="w-5 h-5 md:w-8 md:h-8" />
           </button>
           <button
-            onClick={prev}
-            className="flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-white/30 md:bg-white/20 backdrop-blur-md p-2 md:p-3 rounded-full text-white lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-white/40 z-20"
+            onClick={next}
+            className="flex absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/30 md:bg-white/20 backdrop-blur-md p-2.5 md:p-4 rounded-full text-white lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-white/40 z-20"
           >
             <ChevronRight className="w-5 h-5 md:w-8 md:h-8" />
           </button>
+        </>
+      )}
 
           {/* Dot Indicators */}
-          <div className="absolute bottom-3 md:bottom-10 right-[34px] md:right-[90px] flex gap-1.5 md:gap-3">
+          <div className="absolute bottom-3 md:bottom-10 left-[34px] md:left-[90px] flex gap-1.5 md:gap-3">
             {slides.map((_, i) => (
               <motion.button
                 key={i}
@@ -167,9 +166,10 @@ export default function Hero({ onProductClick }: { onProductClick?: (id: number)
               />
             ))}
           </div>
-        </>
-      )}
-    </section>
-  </div>
-);
+        </section>
+      </div>
+    );
 }
+
+// Fixed positions for arrows
+// Need to add them back properly.

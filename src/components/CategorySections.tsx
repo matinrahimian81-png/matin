@@ -26,8 +26,8 @@ const EXTENDED_MAIN_CATEGORIES = [
 
 export function CategoryIcons() {
   return (
-    <section className="container !max-w-none mx-auto px-4 lg:px-12 pt-0 pb-8 md:pt-0 md:pb-16">
-      <h2 className="text-right md:text-center text-xl md:text-3xl font-black mb-8 md:mb-12 text-gray-800">خرید بر اساس دسته‌بندی</h2>
+    <section className="container !max-w-none mx-auto px-4 lg:px-12 pt-8 pb-8 md:pt-12 md:pb-16">
+      <h2 className="text-center text-xl md:text-3xl font-black mb-8 md:mb-12 text-gray-800">خرید بر اساس دسته‌بندی</h2>
       
       {/* Scrollable list on mobile, grid on desktop */}
       <div className="flex overflow-x-auto no-scrollbar md:grid md:grid-cols-6 lg:grid-cols-8 gap-6 md:gap-y-12 md:gap-x-6 pb-4">

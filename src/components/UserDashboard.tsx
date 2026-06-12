@@ -9,7 +9,7 @@ import {
   Bell, User, LogOut, Camera, ChevronLeft, 
   Plus, ArrowUpRight, ArrowDownLeft, X, ShoppingCart,
   ShieldCheck, ShieldAlert, Mail, Lock, Eye, EyeOff,
-  Image as ImageIcon, Move, Settings, Check
+  Image as ImageIcon, Move, Settings, Check, ShoppingBag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Cropper from 'react-easy-crop';
@@ -1102,6 +1102,7 @@ function SliderManagement() {
   const [isUploading, setIsUploading] = useState(false);
   const [editingSlideId, setEditingSlideId] = useState<number | null>(null);
   const [deletingSlideId, setDeletingSlideId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Cropper state
   const [image, setImage] = useState<string | null>(null);
@@ -1109,14 +1110,16 @@ function SliderManagement() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
   const [newSlide, setNewSlide] = useState({
     title: '',
     subtitle: '',
-    button_text: 'مشاهده محصول',
-    button_pos_x: 20,
-    button_pos_y: 70,
-    button_width: 15, // Default width %
-    button_height: 10, // Default height %
+    button_text: '',
+    button_pos_x: 0,
+    button_pos_y: 0,
+    button_width: 100, // Default to full width
+    button_height: 100, // Default to full height
     button_scale: 1.0,
     product_id: null as number | null,
     image: ''
@@ -1313,6 +1316,7 @@ function SliderManagement() {
       <AnimatePresence mode="wait">
         {showAddForm ? (
           <motion.div
+            key="add-form"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -1324,7 +1328,7 @@ function SliderManagement() {
                </div>
                <div>
                   <h5 className="font-black text-gray-900 text-lg">{editingSlideId ? 'ویرایش اسلاید' : 'افزودن اسلاید جدید'}</h5>
-                  <p className="text-xs text-gray-400 font-bold">تصویر خود را کراپ کنید و موقعیت دکمه را تنظیم نمایید.</p>
+                  <p className="text-xs text-gray-400 font-bold">تصویر خود را کراپ کنید و محدوده کلیک را تنظیم نمایید.</p>
                </div>
             </div>
 
@@ -1337,7 +1341,7 @@ function SliderManagement() {
                  </div>
 
                  {!image ? (
-                   <div className="w-full aspect-[21/9] border-4 border-dashed border-gray-100 rounded-[40px] flex flex-col items-center justify-center relative hover:bg-gray-50 transition-all cursor-pointer group">
+                   <div className="w-full aspect-[21/7] border-4 border-dashed border-gray-100 rounded-[40px] flex flex-col items-center justify-center relative hover:bg-gray-50 transition-all cursor-pointer group">
                      <input type="file" onChange={handleImageSelect} className="absolute inset-0 opacity-0 cursor-pointer z-10" accept="image/*" />
                      <div className="w-20 h-20 bg-white rounded-[30px] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-xl">
                        <Plus className="w-10 h-10 text-[#EF2020]" />
@@ -1347,12 +1351,12 @@ function SliderManagement() {
                    </div>
                  ) : (
                    <div className="space-y-6">
-                     <div className="relative aspect-[21/9] w-full bg-gray-100 rounded-[40px] overflow-hidden shadow-2xl border-4 border-white">
+                     <div className="relative aspect-[21/7] w-full bg-gray-100 rounded-[40px] overflow-hidden shadow-2xl border-4 border-white">
                        <Cropper
                          image={image}
                          crop={crop}
                          zoom={zoom}
-                         aspect={21 / 9}
+                         aspect={21 / 7}
                          onCropChange={setCrop}
                          onCropComplete={onCropComplete}
                          onZoomChange={setZoom}
@@ -1377,436 +1381,71 @@ function SliderManagement() {
                  )}
                </div>
 
-               {/* STEP 2: ACTION ZONE POSITIONING (Below image crop as requested) */}
-               <div className="space-y-6 pt-4 border-t border-gray-50">
-                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-[#EF2020] text-white rounded-lg flex items-center justify-center font-black">۲</div>
-                    <h5 className="font-black text-gray-900">تعیین محل کلیک و متن دکمه</h5>
-                 </div>
-
-                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                    {/* Position Editor */}
-                    <div className="lg:col-span-12 space-y-4">
-                       <div className="flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest px-2">
-                           <span>محل قرارگیری باکس (باکس را در تصویر جابجا کنید)</span>
-                           <div className="flex gap-4">
-                              <span className="text-gray-400">X: {newSlide.button_pos_x}%</span>
-                              <span className="text-gray-400">Y: {newSlide.button_pos_y}%</span>
-                           </div>
-                       </div>
-                       
-                        <div className="relative w-full aspect-[21/9] bg-gray-50 rounded-[40px] shadow-2xl overflow-hidden group/hotspot border-4 border-white">
-                          <div 
-                            className="absolute inset-0 z-0 cursor-crosshair"
-                            onClick={(e) => {
-                               const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                               const x = ((rect.right - e.clientX) / rect.width) * 100;
-                               const y = ((e.clientY - rect.top) / rect.height) * 100;
-                               setNewSlide(prev => ({
-                                 ...prev,
-                                 button_pos_x: Number(Math.max(0, Math.min(100 - (prev.button_width || 15), x - (prev.button_width || 15) / 2)).toFixed(1)),
-                                 button_pos_y: Number(Math.max(0, Math.min(100 - (prev.button_height || 10), y - (prev.button_height || 10) / 2)).toFixed(1))
-                               }));
-                            }}
-                          >
-                             {image ? (
-                                <img src={image} className="w-full h-full object-cover opacity-50 contrast-125 pointer-events-none" alt="Positioning Preview" />
-                             ) : (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gray-950 text-gray-700 text-sm font-black">ابتدا از مرحله ۱ تصویر را انتخاب کنید</div>
-                             )}
-                             <div className="absolute inset-0 bg-black/5 pointer-events-none" />
-                          </div>
-
-                          {/* HOTSPOT / BUTTON BOX - DRAGGABLE & CROP-STYLE */}
-                           <motion.div
-                             drag
-                             dragMomentum={false}
-                             dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
-                             onDrag={(e, info) => {
-                                const parent = (e.currentTarget as HTMLElement).parentElement;
-                                if (!parent) return;
-                                const rect = parent.getBoundingClientRect();
-                                const x = ((rect.right - info.point.x) / rect.width) * 100;
-                                const y = ((info.point.y - rect.top) / rect.height) * 100;
-                                setNewSlide(prev => ({
-                                  ...prev,
-                                  button_pos_x: Number(Math.max(0, Math.min(100 - (prev.button_width || 15), x)).toFixed(1)),
-                                  button_pos_y: Number(Math.max(0, Math.min(100 - (prev.button_height || 10), y)).toFixed(1))
-                                }));
-                             }}
-                             className="absolute border border-white/90 shadow-[0_0_0_1000px_rgba(0,0,0,0.5)] cursor-move z-10"
-                             style={{ 
-                                 right: `${newSlide.button_pos_x}%`, 
-                                 top: `${newSlide.button_pos_y}%`,
-                                 width: `${newSlide.button_width}%`,
-                                 height: `${newSlide.button_height}%`,
-                                 backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                             }}
-                           >
-                              <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
-                                <div className="border-r border-b border-white/40" />
-                                <div className="border-r border-b border-white/40" />
-                                <div className="border-b border-white/40" />
-                                <div className="border-r border-b border-white/40" />
-                                <div className="border-r border-b border-white/40" />
-                                <div className="border-b border-white/40" />
-                                <div className="border-r border-white/40" />
-                                <div className="border-r border-white/40" />
-                                <div />
-                              </div>
-                              
-                              <div className="absolute inset-0 pointer-events-none">
-                                <div className="absolute -top-[1px] -right-[1px] w-5 h-5 border-t-[3px] border-r-[3px] border-white shadow-sm" />
-                                <div className="absolute -top-[1px] -left-[1px] w-5 h-5 border-t-[3px] border-l-[3px] border-white shadow-sm" />
-                                <div className="absolute -bottom-[1px] -right-[1px] w-5 h-5 border-b-[3px] border-r-[3px] border-white shadow-sm" />
-                                <div className="absolute -bottom-[1px] -left-[1px] w-5 h-5 border-b-[3px] border-l-[3px] border-white shadow-sm" />
-
-                                <div 
-                                  className="absolute bottom-[-10px] left-[-10px] w-10 h-10 cursor-nesw-resize pointer-events-auto z-20"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startX = e.clientX;
-                                    const startY = e.clientY;
-                                    const startW = newSlide.button_width || 15;
-                                    const startH = newSlide.button_height || 10;
-                                    const container = e.currentTarget.parentElement?.parentElement;
-                                    
-                                    const onMove = (moveEvent: PointerEvent) => {
-                                      if (!container) return;
-                                      const rect = container.parentElement?.getBoundingClientRect();
-                                      if (!rect) return;
-                                      
-                                      const deltaPxX = startX - moveEvent.clientX;
-                                      const deltaPxY = moveEvent.clientY - startY;
-                                      
-                                      const deltaW = (deltaPxX / rect.width) * 100;
-                                      const deltaH = (deltaPxY / rect.height) * 100;
-                                      
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_width: Number(Math.max(5, Math.min(100 - (prev.button_pos_x || 0), startW + deltaW)).toFixed(1)),
-                                        button_height: Number(Math.max(5, Math.min(100 - (prev.button_pos_y || 0), startH + deltaH)).toFixed(1))
-                                      }));
-                                    };
-                                    
-                                    const onUp = () => {
-                                      window.removeEventListener('pointermove', onMove);
-                                      window.removeEventListener('pointerup', onUp);
-                                    };
-                                    
-                                    window.addEventListener('pointermove', onMove);
-                                    window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-                              </div>
-
-                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <Move className="w-5 h-5 text-white drop-shadow-md opacity-60" />
-                              </div>
-
-                              {/* Selection Handles (Crop Style) - Comprehensive Set */}
-                              <div className="absolute inset-0 pointer-events-none">
-                                {/* Corners */}
-                                <div className="absolute -top-[2px] -right-[2px] w-6 h-6 border-t-[4px] border-r-[4px] border-white shadow-sm z-30" />
-                                <div className="absolute -top-[2px] -left-[2px] w-6 h-6 border-t-[4px] border-l-[4px] border-white shadow-sm z-30" />
-                                <div className="absolute -bottom-[2px] -right-[2px] w-6 h-6 border-b-[4px] border-r-[4px] border-white shadow-sm z-30" />
-                                <div className="absolute -bottom-[2px] -left-[2px] w-6 h-6 border-b-[4px] border-l-[4px] border-white shadow-sm z-30" />
-
-                                {/* Resize Hitspots */}
-                                {/* Top Right */}
-                                <div 
-                                  className="absolute -top-3 -right-3 w-8 h-8 cursor-nesw-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startX = e.clientX;
-                                    const startY = e.clientY;
-                                    const startW = newSlide.button_width;
-                                    const startH = newSlide.button_height;
-                                    const startXPos = newSlide.button_pos_x;
-                                    const startYPos = newSlide.button_pos_y;
-                                    const parentW = e.currentTarget.parentElement?.parentElement?.parentElement?.clientWidth || 1;
-                                    const parentH = e.currentTarget.parentElement?.parentElement?.parentElement?.clientHeight || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dX = (startX - mE.clientX) / parentW * 100;
-                                      const dY = (startY - mE.clientY) / parentH * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_pos_x: Number(Math.max(0, Math.min(startXPos + startW - 5, startXPos + dX)).toFixed(1)),
-                                        button_width: Number(Math.max(5, startW - dX)).toFixed(1),
-                                        button_pos_y: Number(Math.max(0, Math.min(startYPos + startH - 5, startYPos - dY)).toFixed(1)),
-                                        button_height: Number(Math.max(5, startH + dY)).toFixed(1)
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-
-                                {/* Top Left */}
-                                <div 
-                                  className="absolute -top-3 -left-3 w-8 h-8 cursor-nwse-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startX = e.clientX;
-                                    const startY = e.clientY;
-                                    const startW = newSlide.button_width;
-                                    const startH = newSlide.button_height;
-                                    const startYPos = newSlide.button_pos_y;
-                                    const parentW = e.currentTarget.parentElement?.parentElement?.parentElement?.clientWidth || 1;
-                                    const parentH = e.currentTarget.parentElement?.parentElement?.parentElement?.clientHeight || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dX = (mE.clientX - startX) / parentW * 100;
-                                      const dY = (startY - mE.clientY) / parentH * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_width: Number(Math.max(5, Math.min(100 - (prev.button_pos_x || 0), startW + dX)).toFixed(1)),
-                                        button_pos_y: Number(Math.max(0, Math.min(startYPos + startH - 5, startYPos - dY)).toFixed(1)),
-                                        button_height: Number(Math.max(5, startH + dY)).toFixed(1)
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-
-                                {/* Bottom Right */}
-                                <div 
-                                  className="absolute -bottom-3 -right-3 w-8 h-8 cursor-nwse-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startX = e.clientX;
-                                    const startY = e.clientY;
-                                    const startW = newSlide.button_width;
-                                    const startH = newSlide.button_height;
-                                    const startXPos = newSlide.button_pos_x;
-                                    const parentW = e.currentTarget.parentElement?.parentElement?.parentElement?.clientWidth || 1;
-                                    const parentH = e.currentTarget.parentElement?.parentElement?.parentElement?.clientHeight || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dX = (startX - mE.clientX) / parentW * 100;
-                                      const dY = (mE.clientY - startY) / parentH * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_pos_x: Number(Math.max(0, Math.min(startXPos + startW - 5, startXPos + dX)).toFixed(1)),
-                                        button_width: Number(Math.max(5, startW - dX)).toFixed(1),
-                                        button_height: Number(Math.max(5, Math.min(100 - (prev.button_pos_y || 0), startH + dY)).toFixed(1))
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-
-                                {/* Bottom Left (The primary one we already had) */}
-                                <div 
-                                  className="absolute -bottom-3 -left-3 w-8 h-8 cursor-nesw-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startX = e.clientX;
-                                    const startY = e.clientY;
-                                    const startW = newSlide.button_width;
-                                    const startH = newSlide.button_height;
-                                    const parentW = e.currentTarget.parentElement?.parentElement?.parentElement?.clientWidth || 1;
-                                    const parentH = e.currentTarget.parentElement?.parentElement?.parentElement?.clientHeight || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dX = (mE.clientX - startX) / parentW * 100;
-                                      const dY = (mE.clientY - startY) / parentH * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_width: Number(Math.max(5, Math.min(100 - (prev.button_pos_x || 0), startW + dX)).toFixed(1)),
-                                        button_height: Number(Math.max(5, Math.min(100 - (prev.button_pos_y || 0), startH + dY)).toFixed(1))
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-
-                                {/* Middle Handles */}
-                                {/* Top */}
-                                <div 
-                                  className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 cursor-ns-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startY = e.clientY;
-                                    const startH = newSlide.button_height;
-                                    const startYPos = newSlide.button_pos_y;
-                                    const parentH = e.currentTarget.parentElement?.parentElement?.parentElement?.clientHeight || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dY = (startY - mE.clientY) / parentH * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_pos_y: Number(Math.max(0, Math.min(startYPos + startH - 5, startYPos - dY)).toFixed(1)),
-                                        button_height: Number(Math.max(5, startH + dY)).toFixed(1)
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-
-                                {/* Bottom */}
-                                <div 
-                                  className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-6 cursor-ns-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startY = e.clientY;
-                                    const startH = newSlide.button_height;
-                                    const parentH = e.currentTarget.parentElement?.parentElement?.parentElement?.clientHeight || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dY = (mE.clientY - startY) / parentH * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_height: Number(Math.max(5, Math.min(100 - (prev.button_pos_y || 0), startH + dY)).toFixed(1))
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-
-                                {/* Right */}
-                                <div 
-                                  className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-12 cursor-ew-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startX = e.clientX;
-                                    const startW = newSlide.button_width;
-                                    const startXPos = newSlide.button_pos_x;
-                                    const parentW = e.currentTarget.parentElement?.parentElement?.parentElement?.clientWidth || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dX = (startX - mE.clientX) / parentW * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_pos_x: Number(Math.max(0, Math.min(startXPos + startW - 5, startXPos + dX)).toFixed(1)),
-                                        button_width: Number(Math.max(5, startW - dX)).toFixed(1)
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-
-                                {/* Left */}
-                                <div 
-                                  className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-12 cursor-ew-resize pointer-events-auto z-40"
-                                  onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    const startX = e.clientX;
-                                    const startW = newSlide.button_width;
-                                    const parentW = e.currentTarget.parentElement?.parentElement?.parentElement?.clientWidth || 1;
-                                    
-                                    const onMove = (mE: PointerEvent) => {
-                                      const dX = (mE.clientX - startX) / parentW * 100;
-                                      setNewSlide(prev => ({
-                                        ...prev,
-                                        button_width: Number(Math.max(5, Math.min(100 - (prev.button_pos_x || 0), startW + dX)).toFixed(1))
-                                      }));
-                                    };
-                                    const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
-                                    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-                                  }}
-                                />
-                              </div>
-                           </motion.div>
-
-                          <div className="absolute top-4 right-4 px-3 py-1 bg-black/80 backdrop-blur-md rounded-xl text-[9px] font-black text-white border border-white/20 pointer-events-none z-20">
-                             باکس را بکشید یا برای جابجایی سریع روی تصویر کلیک کنید
-                          </div>
-                       </div>
-                     </div>
+                {/* STEP 2: CONTENT */}
+                <div className="space-y-6 pt-4 border-t border-gray-50">
+                  <div className="flex items-center gap-3">
+                     <div className="w-8 h-8 bg-[#EF2020] text-white rounded-lg flex items-center justify-center font-black">۲</div>
+                     <h5 className="font-black text-gray-900">تنظیمات محتوا</h5>
                   </div>
-               </div>
+                        <div className="space-y-4">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">جزئیات متنی (اختیاری)</label>
+                           <input
+                              className="w-full bg-white border border-gray-100 rounded-2xl p-5 text-sm font-bold focus:outline-none shadow-sm transition-all"
+                              value={newSlide.title}
+                              onChange={e => setNewSlide({ ...newSlide, title: e.target.value })}
+                              placeholder="عنوان اسلاید"
+                           />
+                           <textarea
+                              className="w-full bg-white border border-gray-100 rounded-2xl p-5 text-sm font-bold focus:outline-none shadow-sm transition-all resize-none"
+                              rows={2}
+                              value={newSlide.subtitle}
+                              onChange={e => setNewSlide({ ...newSlide, subtitle: e.target.value })}
+                              placeholder="توضیحات کوتاه (Sub-title)"
+                           />
+                        </div>
 
-               <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <div className="space-y-6">
-                          <div className="space-y-4">
-                             <label className="text-[11px] font-black text-gray-400 mr-2 uppercase tracking-widest">محتوای متنی</label>
-                             <input
-                                className="w-full bg-white border border-gray-100 rounded-2xl p-5 text-sm font-bold focus:outline-none focus:placeholder-transparent transition-all shadow-sm"
-                                value={newSlide.title}
-                                onChange={e => setNewSlide({ ...newSlide, title: e.target.value })}
-                                placeholder="عنوان اصلی اسلایدر"
-                             />
-                             <input
-                                className="w-full bg-white border border-gray-100 rounded-2xl p-5 text-sm font-bold focus:outline-none focus:placeholder-transparent transition-all shadow-sm"
-                                value={newSlide.subtitle}
-                                onChange={e => setNewSlide({ ...newSlide, subtitle: e.target.value })}
-                                placeholder="متن تکمیلی (Subtitle)"
-                             />
-                          </div>
-                          
-                          <div className="space-y-4">
-                             <label className="text-[11px] font-black text-gray-400 mr-2 uppercase tracking-widest">تنظیمات منطقه کلیک</label>
-                             <div className="bg-gray-50 p-6 rounded-[2.5rem] border border-gray-100/50">
-                                <p className="text-[11px] font-bold text-gray-400 mb-4 leading-relaxed">
-                                   برای جابجایی منطقه کلیک، آن را بکشید یا روی تصویر کلیک کنید. برای تغییر اندازه، گوشه پایین سمت چپ کادر را بکشید.
-                                </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                   <div className="flex flex-col gap-1">
-                                      <span className="text-[10px] font-black text-gray-400 uppercase">موقعیت X</span>
-                                      <span className="text-sm font-black text-gray-900">{newSlide.button_pos_x}%</span>
-                                   </div>
-                                   <div className="flex flex-col gap-1">
-                                      <span className="text-[10px] font-black text-gray-400 uppercase">موقعیت Y</span>
-                                      <span className="text-sm font-black text-gray-900">{newSlide.button_pos_y}%</span>
-                                   </div>
-                                   <div className="flex flex-col gap-1">
-                                      <span className="text-[10px] font-black text-gray-400 uppercase">عرض</span>
-                                      <span className="text-sm font-black text-gray-900">{newSlide.button_width}%</span>
-                                   </div>
-                                   <div className="flex flex-col gap-1">
-                                      <span className="text-[10px] font-black text-gray-400 uppercase">ارتفاع</span>
-                                      <span className="text-sm font-black text-gray-900">{newSlide.button_height}%</span>
-                                   </div>
-                                </div>
-                             </div>
-                          </div>
-                       </div>
-
-                       <div className="space-y-6">
-                          <div className="space-y-4 h-full flex flex-col">
-                             <label className="text-[11px] font-black text-gray-400 mr-2 uppercase tracking-widest">اتصال به محصول</label>
-                             <select
-                                className="w-full bg-white border border-gray-100 rounded-2xl p-5 text-sm font-bold focus:outline-none transition-all shadow-sm appearance-none cursor-pointer"
-                                value={newSlide.product_id || ''}
-                                onChange={e => setNewSlide({ ...newSlide, product_id: e.target.value ? Number(e.target.value) : null })}
-                             >
-                                <option value="">بدون لینک (فقط عکس)</option>
-                                {products.map(p => (
-                                  <option key={p.id} value={p.id}>{p.title}</option>
-                                ))}
-                             </select>
-                             
-                             <div className="mt-auto pt-6">
-                                <button
-                                  onClick={handleCreateSlide}
-                                  disabled={isUploading}
-                                  className="w-full py-6 bg-[#EF2020] text-white rounded-[30px] text-lg font-black hover:bg-black hover:shadow-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl shadow-red-100"
-                                >
-                                  {isUploading ? (
-                                     <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
-                                  ) : <Check className="w-7 h-7" />}
-                                  <span>{isUploading ? 'در حال پردازش...' : (editingSlideId ? 'ذخیره تغییرات اسلاید' : 'ثبت و انتشار اسلاید ')}</span>
-                                </button>
-                                <button 
-                                  onClick={() => { setShowAddForm(false); setEditingSlideId(null); }}
-                                  className="w-full py-4 text-gray-400 text-sm font-black hover:text-gray-900 transition-colors mt-2"
-                                >
-                                  بی‌خیال، انصراف
-                                </button>
+                        <div className="space-y-4">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">اتصال به محصول</label>
+                           <input
+                              type="text"
+                              placeholder="جستجوی محصول..."
+                              className="w-full bg-white border border-gray-100 rounded-2xl p-4 text-xs font-bold focus:outline-none mb-2"
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                           />
+                           <div className="relative">
+                              <select
+                                 className="w-full bg-white border border-gray-100 rounded-2xl p-5 text-sm font-bold focus:outline-none transition-all shadow-sm appearance-none cursor-pointer pr-12"
+                                 value={newSlide.product_id || ''}
+                                 onChange={e => setNewSlide({ ...newSlide, product_id: e.target.value ? Number(e.target.value) : null })}
+                              >
+                                 <option value="">فقط نمایش تصویر (بدون لینک)</option>
+                                 {products
+                                    .filter(p => !searchTerm || p.title.includes(searchTerm))
+                                    .map(p => (
+                                    <option key={p.id} value={p.id}>{p.title}</option>
+                                 ))}
+                              </select>
+                              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#EF2020]">
+                                 <ShoppingBag className="w-5 h-5" />
                               </div>
                            </div>
                         </div>
+
+                        <div className="pt-4 space-y-3">
+                           <button
+                             onClick={handleCreateSlide}
+                             disabled={isUploading || (!image && !editingSlideId)}
+                             className="w-full py-6 bg-[#EF2020] text-white rounded-3xl text-lg font-black hover:bg-black transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                           >
+                             {isUploading ? (
+                                <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                             ) : <Check className="w-7 h-7" />}
+                             <span>{isUploading ? 'در حال ثبت...' : (editingSlideId ? 'ذخیره تغییرات' : 'انتشار اسلایدر')}</span>
+                           </button>
+                        </div>
                      </div>
                   </div>
-           </motion.div>
+          </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {slides.length === 0 ? (
@@ -1820,7 +1459,7 @@ function SliderManagement() {
             ) : (
               slides.map((slide, idx) => (
                 <div key={slide.id} className="bg-white rounded-[45px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all flex flex-col relative">
-                   <div className="aspect-[21/9] relative scale-[1.001]">
+                   <div className="aspect-[21/7] relative scale-[1.001]">
                       <img src={slide.image} className="w-full h-full object-cover" />
                       
                       {/* Action Buttons - Large and persistent for touch compatibility */}
