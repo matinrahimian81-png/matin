@@ -171,6 +171,12 @@ export default function App() {
           setSearchTerm('');
           setIsDashboardOpen(false);
         }} 
+        onProductClick={(id) => {
+          setSelectedProductId(id);
+          setIsDashboardOpen(false);
+          setIsCartOpen(false);
+          setIsWishlistOpen(false);
+        }}
         cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         wishlistCount={wishlist.length}
         onSearch={(term) => {

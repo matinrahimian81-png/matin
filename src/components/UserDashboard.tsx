@@ -17,6 +17,7 @@ import getCroppedImg from '../lib/cropUtils';
 import { ALL_PRODUCTS } from '../data';
 import { ProductData } from '../types';
 import { isSupabaseConfigured } from '../lib/supabase';
+import MenuManagement from './MenuManagement';
 
 type DashboardSection = 'orders' | 'wishlist' | 'wallet' | 'addresses' | 'comments' | 'notifications' | 'account' | 'admin';
 
@@ -491,7 +492,25 @@ export default function UserDashboard({
 }
 
 function AdminSection({ onProductChange }: { onProductChange?: () => void }) {
-  const [activeTab, setActiveTab] = useState<'products' | 'slider'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'slider' | 'menu'>('products');
+  const [products, setProducts] = useState<ProductData[]>([]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        if (isSupabaseConfigured) {
+          const { supabaseService } = await import('../services/supabaseService');
+          const data = await supabaseService.getProducts();
+          setProducts(data);
+        } else {
+          setProducts(ALL_PRODUCTS);
+        }
+      } catch (e) {
+        setProducts(ALL_PRODUCTS);
+      }
+    };
+    loadProducts();
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -525,6 +544,20 @@ function AdminSection({ onProductChange }: { onProductChange?: () => void }) {
             />
           )}
         </button>
+        <button
+          onClick={() => setActiveTab('menu')}
+          className={`pb-4 text-sm font-black transition-all relative ${
+            activeTab === 'menu' ? 'text-[#EF2020]' : 'text-gray-400 hover:text-gray-600'
+          }`}
+        >
+          تنظیمات منو
+          {activeTab === 'menu' && (
+            <motion.div
+              layoutId="adminTab"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#EF2020]"
+            />
+          )}
+        </button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -532,9 +565,13 @@ function AdminSection({ onProductChange }: { onProductChange?: () => void }) {
           <motion.div key="products" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <ProductManagement onProductChange={onProductChange} />
           </motion.div>
-        ) : (
+        ) : activeTab === 'slider' ? (
           <motion.div key="slider" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <SliderManagement />
+          </motion.div>
+        ) : (
+          <motion.div key="menu" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+            <MenuManagement products={products} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -743,18 +780,21 @@ function ProductManagement({ onProductChange }: { onProductChange?: () => void }
     setLoading(true);
     setDeletingId(null);
     try {
-      const { supabaseService } = await import('../services/supabaseService');
-      
-      console.log('Executing Supabase delete for ID:', id);
-      await supabaseService.deleteProduct(id);
+      if (isSupabaseConfigured) {
+        const { supabaseService } = await import('../services/supabaseService');
+        console.log('Executing Supabase delete for ID:', id);
+        await supabaseService.deleteProduct(id);
+      }
       
       // Update local state immediately for better UX
       setProducts(prev => prev.filter(p => p.id !== id));
       
       alert('محصول با موفقیت حذف شد');
       
-      // Full refresh
-      await fetchProducts();
+      if (isSupabaseConfigured) {
+        // Full refresh
+        await fetchProducts();
+      }
       if (onProductChange) {
         onProductChange();
       }
@@ -1132,11 +1172,40 @@ function SliderManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { supabaseService } = await import('../services/supabaseService');
-      const [slidesData, productsData] = await Promise.all([
-        supabaseService.getSlides(),
-        supabaseService.getProducts()
-      ]);
+      let slidesData = [];
+      let productsData = [];
+
+      if (isSupabaseConfigured) {
+        const { supabaseService } = await import('../services/supabaseService');
+        const [sData, pData] = await Promise.all([
+          supabaseService.getSlides(),
+          supabaseService.getProducts()
+        ]);
+        slidesData = sData || [];
+        productsData = pData || [];
+      } else {
+        // Fallback to local storage or mocked representation of slides
+        const cachedStr = localStorage.getItem('matinkala_local_slides');
+        if (cachedStr) {
+          try {
+            slidesData = JSON.parse(cachedStr);
+          } catch (e) {
+            console.error("Local slides parse error:", e);
+          }
+        }
+        
+        if (!slidesData || slidesData.length === 0) {
+          slidesData = [
+            { id: 101, title: 'جدیدترین گوشی‌های هوشمند بازار', subtitle: 'خرید آسان با تخفیف ویژه ال‌ماتین', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200', button_text: 'دیدن برگزیده‌ها', button_pos_x: 20, button_pos_y: 70, button_width: 15, button_height: 10, button_scale: 1.0, product_id: null },
+            { id: 102, title: 'جدیدترین لپ‌تاپ‌های ایسوس و لنوو', subtitle: 'قدرت پردازش بی‌نهایت با قیمت بهینه', image: 'https://images.unsplash.com/photo-1496181130204-755241524eab?q=80&w=1200', button_text: 'خرید ویژه', button_pos_x: 15, button_pos_y: 65, button_width: 18, button_height: 12, button_scale: 1.0, product_id: null }
+          ];
+          localStorage.setItem('matinkala_local_slides', JSON.stringify(slidesData));
+        }
+
+        // Import default mock products
+        const { ALL_PRODUCTS } = await import('../data');
+        productsData = ALL_PRODUCTS || [];
+      }
       
       // Decode metadata from button_link if present
       const processedSlides = slidesData.map((slide: any) => {
@@ -1184,40 +1253,78 @@ function SliderManagement() {
 
     setIsUploading(true);
     try {
-      const { supabaseService } = await import('../services/supabaseService');
       let imageUrl = newSlide.image;
 
-      if (image && croppedAreaPixels) {
-        const croppedImage = await getCroppedImg(image, croppedAreaPixels);
-        if (!croppedImage) throw new Error('فیل در کراپ تصویر');
-        imageUrl = await supabaseService.uploadSliderImage(croppedImage);
-      }
+      if (isSupabaseConfigured) {
+        const { supabaseService } = await import('../services/supabaseService');
+        if (image && croppedAreaPixels) {
+          const croppedImage = await getCroppedImg(image, croppedAreaPixels);
+          if (!croppedImage) throw new Error('فیل در کراپ تصویر');
+          imageUrl = await supabaseService.uploadSliderImage(croppedImage);
+        }
 
-      if (editingSlideId) {
-        // Encode metadata into button_link to avoid schema errors
-        const { button_width, button_height, button_scale, button_link, ...rest } = newSlide;
-        const meta = { w: button_width, h: button_height, s: button_scale, l: button_link };
-        const payload = {
-          ...rest,
-          button_link: `__META:${JSON.stringify(meta)}`,
-          image: imageUrl
-        };
+        if (editingSlideId) {
+          // Encode metadata into button_link to avoid schema errors
+          const { button_width, button_height, button_scale, button_link, ...rest } = newSlide;
+          const meta = { w: button_width, h: button_height, s: button_scale, l: button_link };
+          const payload = {
+            ...rest,
+            button_link: `__META:${JSON.stringify(meta)}`,
+            image: imageUrl
+          };
 
-        await supabaseService.updateSlide(editingSlideId, payload);
-        alert('اسلاید با موفقیت ویرایش شد');
+          await supabaseService.updateSlide(editingSlideId, payload);
+          alert('اسلاید با موفقیت ویرایش شد');
+        } else {
+          // Encode metadata into button_link to avoid schema errors
+          const { button_width, button_height, button_scale, button_link, ...rest } = newSlide;
+          const meta = { w: button_width, h: button_height, s: button_scale, l: button_link };
+          const payload = {
+            ...rest,
+            button_link: `__META:${JSON.stringify(meta)}`,
+            image: imageUrl,
+            order_index: slides.length
+          };
+
+          await supabaseService.addSlide(payload);
+          alert('اسلاید جدید با موفقیت اضافه شد');
+        }
       } else {
-        // Encode metadata into button_link to avoid schema errors
-        const { button_width, button_height, button_scale, button_link, ...rest } = newSlide;
-        const meta = { w: button_width, h: button_height, s: button_scale, l: button_link };
-        const payload = {
-          ...rest,
-          button_link: `__META:${JSON.stringify(meta)}`,
-          image: imageUrl,
-          order_index: slides.length
-        };
+        // Fallback for non-supabase demo
+        if (image && croppedAreaPixels) {
+          try {
+            const croppedImage = await getCroppedImg(image, croppedAreaPixels);
+            if (croppedImage) {
+              const reader = new FileReader();
+              const base64Promise = new Promise<string>((resolve) => {
+                reader.onloadend = () => resolve(reader.result as string);
+              });
+              reader.readAsDataURL(croppedImage);
+              imageUrl = await base64Promise;
+            }
+          } catch (e) {
+            imageUrl = image; // Use selection directly
+          }
+        } else if (image) {
+          imageUrl = image;
+        }
 
-        await supabaseService.addSlide(payload);
-        alert('اسلاید جدید با موفقیت اضافه شد');
+        const localSlides = JSON.parse(localStorage.getItem('matinkala_local_slides') || '[]');
+        if (editingSlideId) {
+          const updated = localSlides.map((s: any) => s.id === editingSlideId ? { ...s, ...newSlide, image: imageUrl } : s);
+          localStorage.setItem('matinkala_local_slides', JSON.stringify(updated));
+          alert('اسلاید با موفقیت ویرایش شد');
+        } else {
+          const newId = Date.now();
+          const payload = {
+            ...newSlide,
+            id: newId,
+            image: imageUrl,
+            order_index: localSlides.length
+          };
+          localStorage.setItem('matinkala_local_slides', JSON.stringify([...localSlides, payload]));
+          alert('اسلاید جدید با موفقیت اضافه شد');
+        }
       }
 
       setShowAddForm(false);
@@ -1272,8 +1379,14 @@ function SliderManagement() {
 
   const confirmDeleteSlide = async (id: number) => {
     try {
-      const { supabaseService } = await import('../services/supabaseService');
-      await supabaseService.deleteSlide(id);
+      if (isSupabaseConfigured) {
+        const { supabaseService } = await import('../services/supabaseService');
+        await supabaseService.deleteSlide(id);
+      } else {
+        const localSlides = JSON.parse(localStorage.getItem('matinkala_local_slides') || '[]');
+        const updated = localSlides.filter((s: any) => s.id !== id);
+        localStorage.setItem('matinkala_local_slides', JSON.stringify(updated));
+      }
       setSlides(prev => prev.filter(s => s.id !== id));
       setDeletingSlideId(null);
       alert('اسلاید با موفقیت حذف شد');

@@ -5,6 +5,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Search, User, ShoppingCart, Menu, Heart, LayoutGrid, Smartphone, Laptop, Shirt, Home, Sparkles, Gamepad2, Book, Trophy } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { DEFAULT_MENU_CONFIG } from './MenuManagement';
+import { MenuConfig } from '../types';
 
 const CATEGORIES_NAV = [
   { id: 1, name: 'موبایل', icon: <Smartphone className="w-4 h-4" /> },
@@ -26,7 +30,8 @@ export default function Header({
   onUserClick,
   onMenuClick,
   wishlistCount = 0,
-  user
+  user,
+  onProductClick
 }: { 
   onLogoClick?: () => void; 
   cartCount?: number;
@@ -37,11 +42,44 @@ export default function Header({
   onMenuClick?: () => void;
   wishlistCount?: number;
   user?: any;
+  onProductClick?: (id: number) => void;
 }) {
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const categoriesRef = useRef<HTMLDivElement>(null);
 
+  const [menu, setMenu] = useState<MenuConfig>(DEFAULT_MENU_CONFIG);
+  const [activeCatId, setActiveCatId] = useState<string | null>(null);
+
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
+
+  useEffect(() => {
+    const loadMenuConfig = () => {
+      const cached = localStorage.getItem('matinkala_menu_config');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setMenu(parsed);
+          if (parsed.categories && parsed.categories.length > 0) {
+            setActiveCatId(parsed.categories[0].id);
+          }
+        } catch (e) {
+          console.error("Error loading menu config inside Header:", e);
+        }
+      } else {
+        setMenu(DEFAULT_MENU_CONFIG);
+        if (DEFAULT_MENU_CONFIG.categories && DEFAULT_MENU_CONFIG.categories.length > 0) {
+          setActiveCatId(DEFAULT_MENU_CONFIG.categories[0].id);
+        }
+      }
+    };
+    
+    loadMenuConfig();
+
+    window.addEventListener('matinkala_menu_changed', loadMenuConfig);
+    return () => {
+      window.removeEventListener('matinkala_menu_changed', loadMenuConfig);
+    };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -224,45 +262,93 @@ export default function Header({
               }}
               className={`flex items-center gap-3 h-full pl-8 text-[11px] font-black transition-colors relative ${isCategoriesOpen ? 'text-[#EF2020]' : 'text-gray-800 hover:text-[#EF2020]'}`}
             >
-              <LayoutGrid className="w-5 h-5" />
-              <span>دسته‌بندی کالاها</span>
+              {menu.useDefaultIcon ? (
+                <LayoutGrid className="w-5 h-5 animate-pulse" />
+              ) : menu.icon ? (
+                <img src={menu.icon} className="w-5 h-5 object-contain" />
+              ) : (
+                <LayoutGrid className="w-5 h-5" />
+              )}
+              <span>{menu.title || "دسته‌بندی کالاها"}</span>
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-5 bg-gray-100" />
             </button>
             {/* Mega menu placeholder */}
             <div className={`absolute top-full right-0 w-[900px] bg-white shadow-2xl rounded-b-2xl border border-gray-100 transition-all duration-200 flex h-[450px] overflow-hidden z-[1001] ${isCategoriesOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                <div className="w-1/4 border-l border-gray-50 bg-gray-50/50 py-4 overflow-y-auto">
-                   {CATEGORIES_NAV.map(cat => (
-                     <div key={cat.id} className="px-6 py-3 flex items-center gap-3 text-xs font-bold text-gray-600 hover:text-[#EF2020] hover:bg-white cursor-pointer transition-colors">
-                        {cat.icon}
-                        <span>{cat.name}</span>
-                     </div>
-                   ))}
+                <div className="w-1/4 border-l border-gray-50 bg-gray-50/50 py-4 overflow-y-auto relative z-10">
+                   {menu.categories.map((cat, index) => {
+                     const isCurrentActive = activeCatId === cat.id || (!activeCatId && index === 0);
+                     
+                     // Resolve default icon
+                     let IconComponent = LayoutGrid;
+                     if (cat.useDefaultIcon && cat.icon) {
+                       const resolved = (LucideIcons as any)[cat.icon];
+                       if (resolved) IconComponent = resolved;
+                     }
+
+                     return (
+                       <div 
+                         key={cat.id} 
+                         onMouseEnter={() => setActiveCatId(cat.id)}
+                         className="px-6 py-3.5 flex items-center gap-3 text-xs font-bold cursor-pointer transition-all relative"
+                       >
+                         {/* Sliding background red border-right highlight */}
+                         {isCurrentActive && (
+                           <motion.div 
+                             layoutId="activeMegaCategoryBg"
+                             className="absolute inset-0 bg-white border-r-4 border-r-[#EF2020] z-0 shadow-sm"
+                             transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                           />
+                         )}
+                         
+                         {/* Content wrapper with z-index to stay above background slider */}
+                         <div className={`relative z-10 flex items-center gap-3 transition-colors duration-250 ${isCurrentActive ? 'text-[#EF2020]' : 'text-gray-600 hover:text-[#EF2020]'}`}>
+                            {cat.useDefaultIcon ? (
+                              <IconComponent className={`w-4 h-4 transition-colors ${isCurrentActive ? 'text-[#EF2020]' : 'text-gray-400'}`} />
+                            ) : cat.icon ? (
+                              <img src={cat.icon} className="w-4 h-4 object-contain" />
+                            ) : (
+                              <LayoutGrid className="w-4 h-4 text-gray-300" />
+                            )}
+                            <span className="font-extrabold">{cat.title || <span className="text-gray-300">بدون عنوان</span>}</span>
+                         </div>
+                       </div>
+                     );
+                   })}
                 </div>
-                <div className="flex-grow p-10 grid grid-cols-3 gap-10">
-                   <div className="space-y-4">
-                      <h4 className="text-sm font-black text-[#EF2020] pb-2 border-b border-gray-100">برندهای محبوب</h4>
-                      <ul className="space-y-3 text-xs font-bold text-gray-500 uppercase">
-                         <li className="hover:text-gray-900 cursor-pointer">Samsung</li>
-                         <li className="hover:text-gray-900 cursor-pointer">Apple</li>
-                         <li className="hover:text-gray-900 cursor-pointer">Xiaomi</li>
-                         <li className="hover:text-gray-900 cursor-pointer">Sony</li>
-                      </ul>
-                   </div>
-                   <div className="space-y-4">
-                      <h4 className="text-sm font-black text-gray-800 pb-2 border-b border-gray-100">موبایل</h4>
-                      <ul className="space-y-3 text-xs font-bold text-gray-500">
-                         <li className="hover:text-gray-900 cursor-pointer">گوشی موبایل</li>
-                         <li className="hover:text-gray-900 cursor-pointer">لوازم جانبی موبایل</li>
-                      </ul>
-                   </div>
-                   <div className="space-y-4">
-                      <h4 className="text-sm font-black text-gray-800 pb-2 border-b border-gray-100">کالای دیجیتال</h4>
-                      <ul className="space-y-3 text-xs font-bold text-gray-500">
-                         <li className="hover:text-gray-900 cursor-pointer">لپ تاپ</li>
-                         <li className="hover:text-gray-900 cursor-pointer">ساعت هوشمند</li>
-                      </ul>
-                   </div>
-                </div>
+                
+                {/* Moderate-speed animated sliding layout for the columns */}
+                <AnimatePresence mode="wait">
+                  <motion.div 
+                    key={activeCatId || 'default-category'}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex-grow p-10 grid grid-cols-3 gap-10 overflow-y-auto bg-white"
+                  >
+                     {((menu.categories.find(c => c.id === activeCatId) || menu.categories[0])?.columns || []).map(col => (
+                       <div key={col.id} className="space-y-4">
+                          <h4 className="text-sm font-black text-[#EF2020] pb-2 border-b border-gray-100">{col.title || "بخش بی‌نام"}</h4>
+                          <ul className="space-y-3 text-xs font-bold text-gray-500">
+                             {col.items.map(item => (
+                               <li 
+                                 key={item.id} 
+                                 onClick={() => {
+                                   if (item.productId && onProductClick) {
+                                     onProductClick(item.productId);
+                                   }
+                                   setIsCategoriesOpen(false);
+                                 }}
+                                 className="hover:text-gray-900 hover:translate-x-[-4px] cursor-pointer transition-all duration-200"
+                               >
+                                 {item.title}
+                               </li>
+                             ))}
+                          </ul>
+                       </div>
+                     ))}
+                  </motion.div>
+                </AnimatePresence>
             </div>
           </div>
           <nav className="flex items-center gap-4 lg:gap-8 h-full px-4 lg:px-6">

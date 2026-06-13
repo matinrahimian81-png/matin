@@ -36,3 +36,30 @@ export interface Slide {
   product_id?: number | null;
   order_index: number;
 }
+
+export interface MenuLinkItem {
+  id: string;
+  title: string;
+  productId: number | null;
+}
+
+export interface MenuColumn {
+  id: string;
+  title: string;
+  items: MenuLinkItem[];
+}
+
+export interface Level2Category {
+  id: string;
+  title: string;
+  icon?: string;
+  useDefaultIcon: boolean;
+  columns: MenuColumn[];
+}
+
+export interface MenuConfig {
+  title: string;
+  icon?: string;
+  useDefaultIcon: boolean;
+  categories: Level2Category[];
+}
