@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, User, ShoppingCart, Menu, Heart, LayoutGrid, Smartphone, Laptop, Shirt, Home, Sparkles, Gamepad2, Book, Trophy } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DEFAULT_MENU_CONFIG } from './MenuManagement';
+import { DEFAULT_MENU_CONFIG, normalizeMenuConfig } from './MenuManagement';
 import { MenuConfig } from '../types';
 
 const CATEGORIES_NAV = [
@@ -44,11 +44,10 @@ export default function Header({
   user?: any;
   onProductClick?: (id: number) => void;
 }) {
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
-  const categoriesRef = useRef<HTMLDivElement>(null);
-
   const [menu, setMenu] = useState<MenuConfig>(DEFAULT_MENU_CONFIG);
-  const [activeCatId, setActiveCatId] = useState<string | null>(null);
+  const [activeL1Id, setActiveL1Id] = useState<string | null>(null);
+  const [activeL2Id, setActiveL2Id] = useState<string | null>(null);
+  const navRowRef = useRef<HTMLDivElement>(null);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
 
@@ -58,18 +57,14 @@ export default function Header({
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          setMenu(parsed);
-          if (parsed.categories && parsed.categories.length > 0) {
-            setActiveCatId(parsed.categories[0].id);
-          }
+          const normalized = normalizeMenuConfig(parsed);
+          setMenu(normalized);
         } catch (e) {
           console.error("Error loading menu config inside Header:", e);
         }
       } else {
-        setMenu(DEFAULT_MENU_CONFIG);
-        if (DEFAULT_MENU_CONFIG.categories && DEFAULT_MENU_CONFIG.categories.length > 0) {
-          setActiveCatId(DEFAULT_MENU_CONFIG.categories[0].id);
-        }
+        const normalized = normalizeMenuConfig(DEFAULT_MENU_CONFIG);
+        setMenu(normalized);
       }
     };
     
@@ -83,8 +78,8 @@ export default function Header({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (categoriesRef.current && !categoriesRef.current.contains(event.target as Node)) {
-        setIsCategoriesOpen(false);
+      if (navRowRef.current && !navRowRef.current.contains(event.target as Node)) {
+        setActiveL1Id(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -243,122 +238,221 @@ export default function Header({
 
       {/* Nav Row - Hidden on mobile */}
       <div className="hidden md:block bg-white px-4 border-b border-gray-100">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex items-center h-[40px] justify-start">
-          <div 
-            ref={categoriesRef}
-            className="relative shrink-0 h-full"
-            onMouseEnter={() => {
-              // Only use hover for laptop screens (lg)
-              if (window.innerWidth >= 1024) setIsCategoriesOpen(true);
-            }}
-            onMouseLeave={() => {
-              if (window.innerWidth >= 1024) setIsCategoriesOpen(false);
-            }}
-          >
-            <button 
-              onClick={() => {
-                // Toggle on click for tablet/all screens
-                setIsCategoriesOpen(!isCategoriesOpen);
+        <div 
+          ref={navRowRef}
+          onMouseLeave={() => {
+            if (window.innerWidth >= 1024) {
+              setActiveL1Id(null);
+            }
+          }}
+          className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex items-center h-[40px] justify-start relative whitespace-nowrap"
+        >
+          {/* Main button (Item 0) */}
+          {menu.items && menu.items.length > 0 && (
+            <div 
+              className="relative shrink-0 h-full flex items-center"
+              onMouseEnter={() => {
+                if (window.innerWidth >= 1024) {
+                  const firstItem = menu.items![0];
+                  setActiveL1Id(firstItem.id);
+                  if (firstItem.categories && firstItem.categories.length > 0) {
+                    setActiveL2Id(firstItem.categories[0].id);
+                  } else {
+                    setActiveL2Id(null);
+                  }
+                }
               }}
-              className={`flex items-center gap-3 h-full pl-8 text-[11px] font-black transition-colors relative ${isCategoriesOpen ? 'text-[#EF2020]' : 'text-gray-800 hover:text-[#EF2020]'}`}
             >
-              {menu.useDefaultIcon ? (
-                <LayoutGrid className="w-5 h-5 animate-pulse" />
-              ) : menu.icon ? (
-                <img src={menu.icon} className="w-5 h-5 object-contain" />
-              ) : (
-                <LayoutGrid className="w-5 h-5" />
-              )}
-              <span>{menu.title || "دسته‌بندی کالاها"}</span>
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-5 bg-gray-100" />
-            </button>
-            {/* Mega menu placeholder */}
-            <div className={`absolute top-full right-0 w-[900px] bg-white shadow-2xl rounded-b-2xl border border-gray-100 transition-all duration-200 flex h-[450px] overflow-hidden z-[1001] ${isCategoriesOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                <div className="w-1/4 border-l border-gray-50 bg-gray-50/50 py-4 overflow-y-auto relative z-10">
-                   {menu.categories.map((cat, index) => {
-                     const isCurrentActive = activeCatId === cat.id || (!activeCatId && index === 0);
-                     
-                     // Resolve default icon
-                     let IconComponent = LayoutGrid;
-                     if (cat.useDefaultIcon && cat.icon) {
-                       const resolved = (LucideIcons as any)[cat.icon];
-                       if (resolved) IconComponent = resolved;
-                     }
-
-                     return (
-                       <div 
-                         key={cat.id} 
-                         onMouseEnter={() => setActiveCatId(cat.id)}
-                         className="px-6 py-3.5 flex items-center gap-3 text-xs font-bold cursor-pointer transition-all relative"
-                       >
-                         {/* Sliding background red border-right highlight */}
-                         {isCurrentActive && (
-                           <motion.div 
-                             layoutId="activeMegaCategoryBg"
-                             className="absolute inset-0 bg-white border-r-4 border-r-[#EF2020] z-0 shadow-sm"
-                             transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                           />
-                         )}
-                         
-                         {/* Content wrapper with z-index to stay above background slider */}
-                         <div className={`relative z-10 flex items-center gap-3 transition-colors duration-250 ${isCurrentActive ? 'text-[#EF2020]' : 'text-gray-600 hover:text-[#EF2020]'}`}>
-                            {cat.useDefaultIcon ? (
-                              <IconComponent className={`w-4 h-4 transition-colors ${isCurrentActive ? 'text-[#EF2020]' : 'text-gray-400'}`} />
-                            ) : cat.icon ? (
-                              <img src={cat.icon} className="w-4 h-4 object-contain" />
-                            ) : (
-                              <LayoutGrid className="w-4 h-4 text-gray-300" />
-                            )}
-                            <span className="font-extrabold">{cat.title || <span className="text-gray-300">بدون عنوان</span>}</span>
-                         </div>
-                       </div>
-                     );
-                   })}
-                </div>
-                
-                {/* Moderate-speed animated sliding layout for the columns */}
-                <AnimatePresence mode="wait">
-                  <motion.div 
-                    key={activeCatId || 'default-category'}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-                    className="flex-grow p-10 grid grid-cols-3 gap-10 overflow-y-auto bg-white"
-                  >
-                     {((menu.categories.find(c => c.id === activeCatId) || menu.categories[0])?.columns || []).map(col => (
-                       <div key={col.id} className="space-y-4">
-                          <h4 className="text-sm font-black text-[#EF2020] pb-2 border-b border-gray-100">{col.title || "بخش بی‌نام"}</h4>
-                          <ul className="space-y-3 text-xs font-bold text-gray-500">
-                             {col.items.map(item => (
-                               <li 
-                                 key={item.id} 
-                                 onClick={() => {
-                                   if (item.productId && onProductClick) {
-                                     onProductClick(item.productId);
-                                   }
-                                   setIsCategoriesOpen(false);
-                                 }}
-                                 className="hover:text-gray-900 hover:translate-x-[-4px] cursor-pointer transition-all duration-200"
-                               >
-                                 {item.title}
-                               </li>
-                             ))}
-                          </ul>
-                       </div>
-                     ))}
-                  </motion.div>
-                </AnimatePresence>
+              <button 
+                id="nav-catalogue-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const firstItem = menu.items![0];
+                  if (activeL1Id === firstItem.id) {
+                    setActiveL1Id(null);
+                  } else {
+                    setActiveL1Id(firstItem.id);
+                    if (firstItem.categories && firstItem.categories.length > 0) {
+                      setActiveL2Id(firstItem.categories[0].id);
+                    } else {
+                      setActiveL2Id(null);
+                    }
+                  }
+                }}
+                className={`flex items-center gap-3 h-full pl-8 text-[11px] font-black transition-colors relative ${activeL1Id === menu.items[0].id ? 'text-[#EF2020]' : 'text-gray-800 hover:text-[#EF2020]'}`}
+              >
+                {(menu.items[0].useDefaultIcon ?? true) ? (
+                  <LayoutGrid className="w-5 h-5 animate-pulse" />
+                ) : menu.items[0].icon ? (
+                  <img src={menu.items[0].icon} className="w-5 h-5 object-contain" />
+                ) : (
+                  <LayoutGrid className="w-5 h-5" />
+                )}
+                <span>{menu.items[0].title || "دسته‌بندی کالاها"}</span>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-5 bg-gray-100" />
+              </button>
             </div>
-          </div>
+          )}
+
           <nav className="flex items-center gap-4 lg:gap-8 h-full px-4 lg:px-6">
-            {['شگفت‌انگیز', 'سوپرمارکت', 'کارت هدیه', 'پرفروش‌ترین‌ها', 'تخفیف‌ها'].map((link) => (
-              <a key={link} href="#" className="text-[11px] font-bold text-gray-600 hover:text-[#EF2020] transition-colors relative group h-full flex items-center">
-                 <span>{link}</span>
-                 <span className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#EF2020] scale-x-0 group-hover:scale-x-100 transition-transform origin-right"></span>
-              </a>
-            ))}
+            {(menu.items?.slice(1) || []).map((link) => {
+              let IconComponent = null;
+              if (link.useDefaultIcon && link.icon) {
+                IconComponent = (LucideIcons as any)[link.icon];
+              }
+
+              const hasCategories = link.categories && link.categories.length > 0;
+
+              return (
+                <div 
+                  key={link.id} 
+                  className="relative h-full flex items-center group"
+                  onMouseEnter={() => {
+                    if (window.innerWidth >= 1024 && hasCategories) {
+                      setActiveL1Id(link.id);
+                      if (link.categories && link.categories.length > 0) {
+                        setActiveL2Id(link.categories[0].id);
+                      } else {
+                        setActiveL2Id(null);
+                      }
+                    }
+                  }}
+                >
+                  <a 
+                    id={`nav-l1-${link.id}`}
+                    href={link.url || '#'} 
+                    onClick={(e) => {
+                      if (hasCategories) {
+                        e.preventDefault();
+                        if (activeL1Id === link.id) {
+                          setActiveL1Id(null);
+                        } else {
+                          setActiveL1Id(link.id);
+                          if (link.categories && link.categories.length > 0) {
+                            setActiveL2Id(link.categories[0].id);
+                          } else {
+                            setActiveL2Id(null);
+                          }
+                        }
+                      }
+                    }}
+                    className={`text-[11px] font-bold transition-all relative h-full flex items-center gap-1.5 ${activeL1Id === link.id ? 'text-[#EF2020]' : 'text-gray-600 hover:text-[#EF2020]'}`}
+                  >
+                    {link.useDefaultIcon && IconComponent && (
+                      <IconComponent className="w-3.5 h-3.5 text-[#EF2020]/80 group-hover:text-[#EF2020]" />
+                    )}
+                    {!link.useDefaultIcon && link.icon && (
+                      <img src={link.icon} className="w-3.5 h-3.5 object-contain" referrerPolicy="no-referrer" />
+                    )}
+                    <span>{link.title}</span>
+                    <span className={`absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#EF2020] transition-transform origin-right ${activeL1Id === link.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
+                  </a>
+                </div>
+              );
+            })}
           </nav>
+
+          {/* UNIFIED MEGA MENU */}
+          <AnimatePresence>
+            {activeL1Id && (
+              (() => {
+                const activeL1 = menu.items?.find(it => it.id === activeL1Id);
+                if (!activeL1 || !activeL1.categories || activeL1.categories.length === 0) return null;
+
+                return (
+                  <motion.div 
+                    id="nav-mega-menu"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full right-4 lg:right-8 w-[950px] lg:w-[1000px] xl:w-[1100px] bg-white shadow-2xl rounded-b-2xl border border-gray-100 flex h-[450px] overflow-hidden z-[1001]"
+                  >
+                    {/* Category list (Right column of Mega Menu) */}
+                    <div className="w-1/4 border-l border-gray-100 bg-gray-50/50 py-4 overflow-y-auto relative z-10 select-none">
+                      {activeL1.categories.map((cat, index) => {
+                        const isCurrentActive = activeL2Id === cat.id || (!activeL2Id && index === 0);
+                        
+                        let IconComponent = LayoutGrid;
+                        if (cat.useDefaultIcon && cat.icon) {
+                          const resolved = (LucideIcons as any)[cat.icon];
+                          if (resolved) IconComponent = resolved;
+                        }
+
+                        return (
+                          <div 
+                            id={`nav-mega-cat-${cat.id}`}
+                            key={cat.id} 
+                            onMouseEnter={() => {
+                              setActiveL2Id(cat.id);
+                            }}
+                            onClick={() => {
+                              setActiveL2Id(cat.id);
+                            }}
+                            className="px-6 py-3.5 flex items-center gap-3 text-xs font-bold cursor-pointer transition-all relative"
+                          >
+                            {/* Sliding/State background red borderhighlight */}
+                            {isCurrentActive && (
+                              <motion.div 
+                                layoutId="activeMegaCategoryBgUnified"
+                                className="absolute inset-0 bg-white border-r-4 border-r-[#EF2020] z-0 shadow-sm"
+                                transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                              />
+                            )}
+                            
+                            <div className={`relative z-10 flex items-center gap-3 transition-colors duration-200 ${isCurrentActive ? 'text-[#EF2020]' : 'text-gray-600 hover:text-[#EF2020]'}`}>
+                              {cat.useDefaultIcon ? (
+                                <IconComponent className={`w-4 h-4 transition-colors ${isCurrentActive ? 'text-[#EF2020]' : 'text-gray-400'}`} />
+                              ) : cat.icon ? (
+                                <img src={cat.icon} className="w-4 h-4 object-contain" />
+                              ) : (
+                                <LayoutGrid className="w-4 h-4 text-gray-300" />
+                              )}
+                              <span className="font-extrabold">{cat.title || <span className="text-gray-300">بدون عنوان</span>}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Columns list (Left content of Mega Menu) */}
+                    <AnimatePresence mode="wait">
+                      <motion.div 
+                        key={activeL2Id || 'default-category'}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        className="flex-grow p-10 grid grid-cols-3 gap-10 overflow-y-auto bg-white"
+                      >
+                        {((activeL1.categories.find(c => c.id === activeL2Id) || activeL1.categories[0])?.columns || []).map((col) => (
+                          <div id={`nav-mega-col-${col.id}`} key={col.id} className="space-y-4">
+                            <h4 className="text-sm font-black text-[#EF2020] pb-2 border-b border-gray-100">{col.title || "بخش بی‌نام"}</h4>
+                            <ul className="space-y-3 text-xs font-bold text-gray-500">
+                              {(col.items || []).map((item) => (
+                                <li 
+                                  key={item.id}
+                                  onClick={() => {
+                                    if (item.productId && onProductClick) {
+                                      onProductClick(item.productId);
+                                    }
+                                    setActiveL1Id(null);
+                                  }}
+                                  className="hover:text-gray-900 hover:translate-x-[-4px] cursor-pointer transition-all duration-200 text-right leading-relaxed"
+                                >
+                                  {item.title}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </motion.div>
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })()
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>

@@ -57,9 +57,20 @@ export interface Level2Category {
   columns: MenuColumn[];
 }
 
-export interface MenuConfig {
+export interface Level1Item {
+  id: string;
   title: string;
-  icon?: string;
+  url: string;
   useDefaultIcon: boolean;
+  icon?: string;
   categories: Level2Category[];
+}
+
+export interface MenuConfig {
+  items?: Level1Item[];
+  title?: string;
+  icon?: string;
+  useDefaultIcon?: boolean;
+  categories?: Level2Category[];
+  extraLinks?: { id: string; title: string; url: string; useDefaultIcon?: boolean; icon?: string }[];
 }

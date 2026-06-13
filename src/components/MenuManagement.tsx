@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import * as LucideIcons from 'lucide-react';
 import { 
   ChevronDown, 
   ChevronLeft, 
+  ChevronUp,
+  ArrowUp,
+  ArrowDown,
   Plus, 
   Trash2, 
   Edit, 
@@ -24,7 +28,7 @@ import {
   Heart,
   User
 } from 'lucide-react';
-import { MenuConfig, Level2Category, MenuColumn, MenuLinkItem, ProductData } from '../types';
+import { MenuConfig, Level1Item, Level2Category, MenuColumn, MenuLinkItem, ProductData } from '../types';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 export const SUPPORTED_DEFAULT_ICONS = [
@@ -49,6 +53,7 @@ export const DEFAULT_MENU_CONFIG: MenuConfig = {
       id: "cat_1",
       title: "موبایل",
       useDefaultIcon: true,
+      icon: "Smartphone",
       columns: [
         {
           id: "col_1_1",
@@ -82,6 +87,7 @@ export const DEFAULT_MENU_CONFIG: MenuConfig = {
       id: "cat_2",
       title: "لپ‌تاپ",
       useDefaultIcon: true,
+      icon: "Laptop",
       columns: [
         {
           id: "col_2_1",
@@ -114,6 +120,7 @@ export const DEFAULT_MENU_CONFIG: MenuConfig = {
       id: "cat_3",
       title: "پوشاک",
       useDefaultIcon: true,
+      icon: "Shirt",
       columns: [
         {
           id: "col_3_1",
@@ -140,9 +147,225 @@ export const DEFAULT_MENU_CONFIG: MenuConfig = {
           ]
         }
       ]
+    },
+    {
+      id: "cat_4",
+      title: "شگفت‌انگیز",
+      useDefaultIcon: true,
+      icon: "Sparkles",
+      columns: [
+        {
+          id: "col_4_1",
+          title: "پیشنهادات داغ شگفت‌انگیز",
+          items: [
+            { id: "item_4_1_1", title: "پرفروش‌ترین‌های تخفیف‌دار", productId: null },
+            { id: "item_4_1_2", title: "کالاهای منتخب ویژه دیجی‌ماتین", productId: null },
+          ]
+        },
+        {
+          id: "col_4_2",
+          title: "شگفت‌انگیز روزانه",
+          items: [
+            { id: "item_4_2_1", title: "کالای دیجیتال شگفت‌انگیز", productId: null },
+            { id: "item_4_2_2", title: "تجهیزات خانگی ویژه", productId: null },
+          ]
+        },
+        {
+          id: "col_4_3",
+          title: "تخفیف‌های بالای ۵۰٪",
+          items: [
+            { id: "item_4_3_1", title: "تی‌شرت و شلوار شگفت‌انگیز", productId: null },
+            { id: "item_4_3_2", title: "اکسسوری و ساعت با نصف قیمت", productId: null },
+          ]
+        }
+      ]
+    },
+    {
+      id: "cat_5",
+      title: "سوپرمارکت",
+      useDefaultIcon: true,
+      icon: "LayoutGrid",
+      columns: [
+        {
+          id: "col_5_1",
+          title: "کالاهای اساسی و خواربار",
+          items: [
+            { id: "item_5_1_1", title: "برنج و روغن سرخ‌کردنی", productId: null },
+            { id: "item_5_1_2", title: "قند و شکر سفید", productId: null },
+          ]
+        },
+        {
+          id: "col_5_2",
+          title: "لبنیات و پروتئینی تازه",
+          items: [
+            { id: "item_5_2_1", title: "شیر کم چرب و ماست دبه", productId: null },
+            { id: "item_5_2_2", title: "تخم مرغ و فیله مرغ تازه", productId: null },
+          ]
+        },
+        {
+          id: "col_5_3",
+          title: "مواد شوینده و بهداشتی",
+          items: [
+            { id: "item_5_3_1", title: "مایع دستشویی و پودر لباس", productId: null },
+            { id: "item_5_3_2", title: "دستمال کاغذی جعبه‌ای", productId: null },
+          ]
+        }
+      ]
+    },
+    {
+      id: "cat_6",
+      title: "کارت هدیه",
+      useDefaultIcon: true,
+      icon: "Trophy",
+      columns: [
+        {
+          id: "col_6_1",
+          title: "کارت هدیه تولد و سالگرد",
+          items: [
+            { id: "item_6_1_1", title: "کارت هدیه طرح تولد مبارک", productId: null },
+            { id: "item_6_1_2", title: "طرح سالگرد ازدواج و نامزدی", productId: null },
+          ]
+        },
+        {
+          id: "col_6_2",
+          title: "کارت هدیه سازمانی",
+          items: [
+            { id: "item_6_2_1", title: "کارت خرید گروهی و انفرادی", productId: null },
+            { id: "item_6_2_2", title: "هدیه مناسبتی پرسنل", productId: null },
+          ]
+        },
+        {
+          id: "col_6_3",
+          title: "کارت‌های اعتباری مختلف",
+          items: [
+            { id: "item_6_3_1", title: "کارت اعتباری ۲۰۰ هزار تومانی", productId: null },
+            { id: "item_6_3_2", title: "کارت اعتباری ۱ میلیون تومانی", productId: null },
+          ]
+        }
+      ]
+    },
+    {
+      id: "cat_7",
+      title: "پرفروش‌ترین‌ها",
+      useDefaultIcon: true,
+      icon: "Heart",
+      columns: [
+        {
+          id: "col_7_1",
+          title: "دیجیتال پرفروش هفته",
+          items: [
+            { id: "item_7_1_1", title: "موبایل سامسونگ پرفروش", productId: null },
+            { id: "item_7_1_2", title: "ساعت هوشمند پرطرفدار", productId: null },
+          ]
+        },
+        {
+          id: "col_7_2",
+          title: "لوازم خانه پرطرفدار",
+          items: [
+            { id: "item_7_2_1", title: "جاروبرقی و تلویزیون پرفروش", productId: null },
+            { id: "item_7_2_2", title: "همزن برقی و مخلوط کن", productId: null },
+          ]
+        },
+        {
+          id: "col_7_3",
+          title: "مد و پوشاک برگزیده",
+          items: [
+            { id: "item_7_3_1", title: "کفش ورزشی مردانه ترند", productId: null },
+            { id: "item_7_3_2", title: "شلوار کتان اسپرت", productId: null },
+          ]
+        }
+      ]
+    },
+    {
+      id: "cat_8",
+      title: "تخفیف‌ها",
+      useDefaultIcon: true,
+      icon: "Trophy",
+      columns: [
+        {
+          id: "col_8_1",
+          title: "تخفیف‌های استثنایی کالا",
+          items: [
+            { id: "item_8_1_1", title: "کالاهای نصف قیمت (۵۰٪)", productId: null },
+            { id: "item_8_1_2", title: "تخفیف روی لوازم جانبی موبایل", productId: null },
+          ]
+        },
+        {
+          id: "col_8_2",
+          title: "پیشنهادات شگفت‌انگیز سوپرمارکت",
+          items: [
+            { id: "item_8_2_1", title: "تخفیف روی لبنیات روزانه", productId: null },
+            { id: "item_8_2_2", title: "شوینده‌های پر تخفیف", productId: null },
+          ]
+        },
+        {
+          id: "col_8_3",
+          title: "کدهای تخفیف جشنواره و خرید اول",
+          items: [
+            { id: "item_8_3_1", title: "کد تخفیف خرید اول مشتریان", productId: null },
+            { id: "item_8_3_2", title: "ارسال کاملاً رایگان برای خرید اول", productId: null },
+          ]
+        }
+      ]
     }
+  ],
+  extraLinks: [
+    { id: "extra_1", title: "شگفت‌انگیز", url: "#", useDefaultIcon: true, icon: "Sparkles" },
+    { id: "extra_2", title: "سوپرمارکت", url: "#", useDefaultIcon: true, icon: "LayoutGrid" },
+    { id: "extra_3", title: "کارت هدیه", url: "#", useDefaultIcon: true, icon: "Trophy" },
+    { id: "extra_4", title: "پرفروش‌ترین‌ها", url: "#", useDefaultIcon: true, icon: "Heart" },
+    { id: "extra_5", title: "تخفیف‌ها", url: "#", useDefaultIcon: true, icon: "Sparkles" },
   ]
 };
+
+export function normalizeMenuConfig(config: any): MenuConfig {
+  if (!config) return { items: [] };
+
+  // If already normalized
+  if (config.items && Array.isArray(config.items) && config.items.length > 0) {
+    return {
+      items: config.items.map((it: any) => ({
+        id: it.id || "l1_" + Math.random(),
+        title: it.title || "بدون عنوان",
+        url: it.url || "#",
+        useDefaultIcon: it.useDefaultIcon !== undefined ? it.useDefaultIcon : true,
+        icon: it.icon || "Sparkles",
+        categories: Array.isArray(it.categories) ? it.categories.map((c: any) => ({
+          ...c,
+          columns: Array.isArray(c.columns) ? c.columns : []
+        })) : []
+      }))
+    };
+  }
+
+  // Convert legacy structure
+  const mainL1Item: Level1Item = {
+    id: "level1_first",
+    title: config.title || "دسته‌بندی کالاها",
+    url: "#",
+    useDefaultIcon: config.useDefaultIcon !== undefined ? config.useDefaultIcon : true,
+    icon: config.icon || "LayoutGrid",
+    categories: Array.isArray(config.categories) ? config.categories.map((c: any) => ({
+      ...c,
+      columns: Array.isArray(c.columns) ? c.columns : []
+    })) : []
+  };
+
+  const extraL1Items: Level1Item[] = Array.isArray(config.extraLinks) 
+    ? config.extraLinks.map((link: any, index: number) => ({
+        id: link.id || "extra_" + index,
+        title: link.title || "بدون عنوان",
+        url: link.url || "#",
+        useDefaultIcon: link.useDefaultIcon !== undefined ? link.useDefaultIcon : true,
+        icon: link.icon || "Sparkles",
+        categories: [] // extra links usually start with no nested sub-categories
+      }))
+    : [];
+
+  return {
+    items: [mainL1Item, ...extraL1Items]
+  };
+}
 
 export default function MenuManagement({ products = [] }: { products?: ProductData[] }) {
   const [menu, setMenu] = useState<MenuConfig>(DEFAULT_MENU_CONFIG);
@@ -150,7 +373,7 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
   const [errorMsg, setErrorMsg] = useState('');
 
   // Accordion open states
-  const [isLevel1Open, setIsLevel1Open] = useState(true);
+  const [expandedL1Id, setExpandedL1Id] = useState<string | null>("level1_first");
   const [expandedL2Ids, setExpandedL2Ids] = useState<string[]>([]);
 
   // Editing modals/forms state
@@ -164,10 +387,14 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
       const cached = localStorage.getItem('matinkala_menu_config');
       if (cached) {
         try {
-          setMenu(JSON.parse(cached));
+          const parsed = JSON.parse(cached);
+          const normalized = normalizeMenuConfig(parsed);
+          setMenu(normalized);
         } catch (e) {
           console.error("Error reading cached menu config:", e);
         }
+      } else {
+        setMenu(normalizeMenuConfig(DEFAULT_MENU_CONFIG));
       }
 
       // 2. Fetch from Supabase if configured
@@ -181,8 +408,9 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
             .maybeSingle();
 
           if (!error && data?.value) {
-            setMenu(data.value);
-            localStorage.setItem('matinkala_menu_config', JSON.stringify(data.value));
+            const normalized = normalizeMenuConfig(data.value);
+            setMenu(normalized);
+            localStorage.setItem('matinkala_menu_config', JSON.stringify(normalized));
             window.dispatchEvent(new Event('matinkala_menu_changed'));
           } else {
             // Attempt 2: from menu_config table
@@ -193,8 +421,9 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
               .maybeSingle();
 
             if (!menuErr && menuData?.config) {
-              setMenu(menuData.config);
-              localStorage.setItem('matinkala_menu_config', JSON.stringify(menuData.config));
+              const normalized = normalizeMenuConfig(menuData.config);
+              setMenu(normalized);
+              localStorage.setItem('matinkala_menu_config', JSON.stringify(normalized));
               window.dispatchEvent(new Event('matinkala_menu_changed'));
             }
           }
@@ -244,37 +473,102 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
 
   // --- CRUD OPERATIONS ---
 
-  // Level 1 Edit
-  const handleEditLevel1 = () => {
-    setEditingItemType('level1');
-    setEditingData({
-      title: menu.title,
-      icon: menu.icon || '',
-      useDefaultIcon: menu.useDefaultIcon
+  // Level 1 Edit/CRUD
+  const handleAddNewL1 = () => {
+    const newL1: Level1Item = {
+      id: "level1_" + Date.now(),
+      title: "سطح جدید منو (سطح یک)",
+      url: "#",
+      useDefaultIcon: true,
+      icon: "Sparkles",
+      categories: [
+        {
+          id: "cat_new_" + Date.now(),
+          title: "دسته‌بندی نمونه (سطح دو)",
+          useDefaultIcon: true,
+          icon: "Smartphone",
+          columns: [
+            { id: "col_new_1_" + Date.now(), title: "ستون اول (سطح سه)", items: [] },
+            { id: "col_new_2_" + Date.now(), title: "ستون دوم (سطح سه)", items: [] },
+            { id: "col_new_3_" + Date.now(), title: "ستون سوم (سطح سه)", items: [] }
+          ]
+        }
+      ]
+    };
+    setMenu(prev => {
+      const list = prev.items || [];
+      return { ...prev, items: [newL1, ...list] };
     });
+    setExpandedL1Id(newL1.id);
+    setEditingItemType('level1');
+    setEditingData({ ...newL1 });
+    showToast("سطح جدید به بالای منوها اضافه شد.");
+  };
+
+  const handleEditL1 = (item: Level1Item) => {
+    setEditingItemType('level1');
+    setEditingData({ ...item });
   };
 
   const handleSaveLevel1 = () => {
-    if (!editingData.title.trim()) {
+    if (!editingData?.title?.trim()) {
       showToast("عنوان منو نمی‌تواند خالی باشد.", true);
       return;
     }
     setMenu(prev => ({
       ...prev,
-      title: editingData.title,
-      icon: editingData.icon,
-      useDefaultIcon: editingData.useDefaultIcon
+      items: (prev.items || []).map(it => 
+        it.id === editingData.id 
+          ? { ...it, title: editingData.title, url: editingData.url, icon: editingData.icon, useDefaultIcon: editingData.useDefaultIcon }
+          : it
+      )
     }));
     setEditingItemType(null);
-    showToast("تغییرات سطح اول اعمال شد. برای ذخیره‌سازی نهایی دکمه ذخیره انتهای صفحه را بفشارید.");
+    showToast("تغییرات سطح یک ذخیره موقت شد.");
+  };
+
+  const handleDeleteL1 = (id: string) => {
+    if (confirm("آیا از حذف این سطح و کلیه زیرمجموعه‌های آن اطمینان دارید؟")) {
+      setMenu(prev => ({
+        ...prev,
+        items: (prev.items || []).filter(item => item.id !== id)
+      }));
+      showToast("سطح با موفقیت حذف شد.");
+    }
+  };
+
+  const handleMoveL1Up = (index: number) => {
+    if (index === 0) return;
+    setMenu(prev => {
+      const list = [...(prev.items || [])];
+      const temp = list[index];
+      list[index] = list[index - 1];
+      list[index - 1] = temp;
+      return { ...prev, items: list };
+    });
+    showToast("سطح به بالا منتقل شد.");
+  };
+
+  const handleMoveL1Down = (index: number) => {
+    const items = menu.items || [];
+    if (index === items.length - 1) return;
+    setMenu(prev => {
+      const list = [...(prev.items || [])];
+      const temp = list[index];
+      list[index] = list[index + 1];
+      list[index + 1] = temp;
+      return { ...prev, items: list };
+    });
+    showToast("سطح به پایین منتقل شد.");
   };
 
   // Level 2 CRUD
-  const handleAddNewL2 = () => {
+  const handleAddNewL2 = (l1Id: string) => {
     const newL2: Level2Category = {
       id: "cat_" + Date.now(),
-      title: "", // Blank so user can write inside
+      title: "دسته‌بندی جدید",
       useDefaultIcon: true,
+      icon: "Smartphone",
       columns: [
         { id: "col_" + Date.now() + "_1", title: "بخش اول", items: [] },
         { id: "col_" + Date.now() + "_2", title: "بخش دوم", items: [] },
@@ -283,65 +577,104 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
     };
     setMenu(prev => ({
       ...prev,
-      categories: [...prev.categories, newL2]
+      items: (prev.items || []).map(item => 
+        item.id === l1Id 
+          ? { ...item, categories: [...(item.categories || []), newL2] }
+          : item
+      )
     }));
-    // Auto edit & expand
-    toggleL2Expand(newL2.id);
+    setExpandedL2Ids(prev => [...prev, newL2.id]);
     setEditingItemType('level2');
-    setEditingData({
-      id: newL2.id,
-      title: '',
-      icon: '',
-      useDefaultIcon: true
-    });
+    setEditingData({ ...newL2, l1Id });
   };
 
-  const handleEditL2 = (cat: Level2Category, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleEditL2 = (l1Id: string, cat: Level2Category) => {
     setEditingItemType('level2');
-    setEditingData({
-      id: cat.id,
-      title: cat.title,
-      icon: cat.icon || '',
-      useDefaultIcon: cat.useDefaultIcon
-    });
+    setEditingData({ ...cat, l1Id });
   };
 
   const handleSaveL2 = () => {
-    if (!editingData.title.trim()) {
+    if (!editingData?.title?.trim()) {
       showToast("عنوان دسته‌بندی نمی‌تواند خالی باشد.", true);
       return;
     }
     setMenu(prev => ({
       ...prev,
-      categories: prev.categories.map(c => 
-        c.id === editingData.id 
-          ? { ...c, title: editingData.title, icon: editingData.icon, useDefaultIcon: editingData.useDefaultIcon }
-          : c
-      )
+      items: (prev.items || []).map(item => {
+        if (item.id === editingData.l1Id) {
+          return {
+            ...item,
+            categories: (item.categories || []).map(c => 
+              c.id === editingData.id 
+                ? { ...c, title: editingData.title, icon: editingData.icon, useDefaultIcon: editingData.useDefaultIcon }
+                : c
+            )
+          };
+        }
+        return item;
+      })
     }));
     setEditingItemType(null);
     showToast("تغییرات دسته‌بندی ذخیره موقت شد.");
   };
 
-  const handleDeleteL2 = (id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleDeleteL2 = (l1Id: string, catId: string) => {
     if (confirm("آیا از حذف این دسته‌بندی و تمامی زیرمجموعه‌های آن اطمینان دارید؟")) {
       setMenu(prev => ({
         ...prev,
-        categories: prev.categories.filter(c => c.id !== id)
+        items: (prev.items || []).map(item => 
+          item.id === l1Id 
+            ? { ...item, categories: (item.categories || []).filter(c => c.id !== catId) }
+            : item
+        )
       }));
       showToast("دسته‌بندی با موفقیت حذف شد.");
     }
   };
 
+  const handleMoveL2Up = (l1Id: string, index: number) => {
+    if (index === 0) return;
+    setMenu(prev => ({
+      ...prev,
+      items: (prev.items || []).map(item => {
+        if (item.id === l1Id) {
+          const list = [...(item.categories || [])];
+          const temp = list[index];
+          list[index] = list[index - 1];
+          list[index - 1] = temp;
+          return { ...item, categories: list };
+        }
+        return item;
+      })
+    }));
+    showToast("دسته‌بندی به بالا منتقل شد.");
+  };
+
+  const handleMoveL2Down = (l1Id: string, index: number) => {
+    const l1Item = (menu.items || []).find(item => item.id === l1Id);
+    if (!l1Item || index === (l1Item.categories || []).length - 1) return;
+    setMenu(prev => ({
+      ...prev,
+      items: (prev.items || []).map(item => {
+        if (item.id === l1Id) {
+          const list = [...(item.categories || [])];
+          const temp = list[index];
+          list[index] = list[index + 1];
+          list[index + 1] = temp;
+          return { ...item, categories: list };
+        }
+        return item;
+      })
+    }));
+    showToast("دسته‌بندی به پایین منتقل شد.");
+  };
+
   // Level 3 Column CRUD
-  // User says: "بشه اضافه و ویرایش . حذف سه دسته بندی باشه ولی نباید برای انجام تکیل فرایند تعداد دسته بندی کمتر از سه تا یا بیشتر باشه"
-  // So under each L2 item, we can add, edit, delete columns. BUT we enforce a strict validation that there must be EXACTLY 3 columns inside each Level 2 item!
-  const handleAddCol = (catId: string) => {
-    const cat = menu.categories.find(c => c.id === catId);
+  const handleAddCol = (l1Id: string, catId: string) => {
+    const l1Item = (menu.items || []).find(item => item.id === l1Id);
+    const cat = (l1Item?.categories || []).find(c => c.id === catId);
     if (cat && cat.columns.length >= 3) {
-      showToast("تعداد کل ستون‌ها نباید بیشتر از ۳ باشد! (برای اضافه کردن یک ستون جدید، باید یکی از ۳ ستون فعلی را حذف کنید)", true);
+      showToast("تعداد کل ستون‌ها نباید بیشتر از ۳ باشد! برای ورود یک ستون جدید، یکی از ۳ ستون فعلی را حذف کنید.", true);
       return;
     }
     const newCol: MenuColumn = {
@@ -351,15 +684,24 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
     };
     setMenu(prev => ({
       ...prev,
-      categories: prev.categories.map(c => 
-        c.id === catId ? { ...c, columns: [...c.columns, newCol] } : c
-      )
+      items: (prev.items || []).map(item => {
+        if (item.id === l1Id) {
+          return {
+            ...item,
+            categories: (item.categories || []).map(c => 
+              c.id === catId ? { ...c, columns: [...c.columns, newCol] } : c
+            )
+          };
+        }
+        return item;
+      })
     }));
   };
 
-  const handleEditCol = (catId: string, col: MenuColumn) => {
+  const handleEditCol = (l1Id: string, catId: string, col: MenuColumn) => {
     setEditingItemType('level3_col');
     setEditingData({
+      l1Id,
       catId,
       colId: col.id,
       title: col.title
@@ -367,61 +709,79 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
   };
 
   const handleSaveCol = () => {
-    if (!editingData.title.trim()) {
+    if (!editingData?.title?.trim()) {
       showToast("عنوان ستون نمی‌تواند خالی باشد.", true);
       return;
     }
     setMenu(prev => ({
       ...prev,
-      categories: prev.categories.map(c => {
-        if (c.id === editingData.catId) {
+      items: (prev.items || []).map(item => {
+        if (item.id === editingData.l1Id) {
           return {
-            ...c,
-            columns: c.columns.map(col => 
-              col.id === editingData.colId ? { ...col, title: editingData.title } : col
-            )
+            ...item,
+            categories: (item.categories || []).map(c => {
+              if (c.id === editingData.catId) {
+                return {
+                  ...c,
+                  columns: c.columns.map(col => 
+                    col.id === editingData.colId ? { ...col, title: editingData.title } : col
+                  )
+                };
+              }
+              return c;
+            })
           };
         }
-        return c;
+        return item;
       })
     }));
     setEditingItemType(null);
     showToast("عنوان ستون با موفقیت تغییر کرد.");
   };
 
-  const handleDeleteCol = (catId: string, colId: string) => {
+  const handleDeleteCol = (l1Id: string, catId: string, colId: string) => {
     if (confirm("آیا مطمئن هستید که می‌خواهید این ستون را به همراه تمام لینک‌های آن حذف کنید؟")) {
       setMenu(prev => ({
         ...prev,
-        categories: prev.categories.map(c => {
-          if (c.id === catId) {
+        items: (prev.items || []).map(item => {
+          if (item.id === l1Id) {
             return {
-              ...c,
-              columns: c.columns.filter(col => col.id !== colId)
+              ...item,
+              categories: (item.categories || []).map(c => {
+                if (c.id === catId) {
+                  return {
+                    ...c,
+                    columns: c.columns.filter(col => col.id !== colId)
+                  };
+                }
+                return c;
+              })
             };
           }
-          return c;
+          return item;
         })
       }));
-      showToast("ستون حدف شد. توجه کنید که برای ذخیره نهایی کل منو، تعداد ستون‌های هر بخش باید دقیقاً ۳ عدد باشد.");
+      showToast("ستون حذف شد.");
     }
   };
 
-  // Level 3 Links CRUD
-  const handleAddLink = (catId: string, colId: string) => {
+  // Level 4 Link Items CRUD
+  const handleAddLink = (l1Id: string, catId: string, colId: string) => {
     setEditingItemType('level3_link');
     setEditingData({
+      l1Id,
       catId,
       colId,
-      linkId: null, // null means add new
+      linkId: null,
       title: '',
       productId: null
     });
   };
 
-  const handleEditLink = (catId: string, colId: string, item: MenuLinkItem) => {
+  const handleEditLink = (l1Id: string, catId: string, colId: string, item: MenuLinkItem) => {
     setEditingItemType('level3_link');
     setEditingData({
+      l1Id,
       catId,
       colId,
       linkId: item.id,
@@ -431,108 +791,120 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
   };
 
   const handleSaveLink = () => {
-    if (!editingData.title.trim()) {
+    if (!editingData?.title?.trim()) {
       showToast("عنوان نوشته/لینک نمی‌تواند خالی باشد.", true);
       return;
     }
-
     setMenu(prev => ({
       ...prev,
-      categories: prev.categories.map(c => {
-        if (c.id === editingData.catId) {
+      items: (prev.items || []).map(item => {
+        if (item.id === editingData.l1Id) {
           return {
-            ...c,
-            columns: c.columns.map(col => {
-              if (col.id === editingData.colId) {
-                if (editingData.linkId) {
-                  // Edit
-                  return {
-                    ...col,
-                    items: col.items.map(it => 
-                      it.id === editingData.linkId 
-                        ? { ...it, title: editingData.title, productId: editingData.productId ? Number(editingData.productId) : null }
-                        : it
-                    )
-                  };
-                } else {
-                  // Add new
-                  return {
-                    ...col,
-                    items: [
-                      ...col.items,
-                      {
-                        id: "item_" + Date.now(),
-                        title: editingData.title,
-                        productId: editingData.productId ? Number(editingData.productId) : null
-                      }
-                    ]
-                  };
-                }
-              }
-              return col;
-            })
-          };
-        }
-        return c;
-      })
-    }));
-
-    setEditingItemType(null);
-    showToast("لینک جدید ذخیره موقت شد.");
-  };
-
-  const handleDeleteLink = (catId: string, colId: string, linkId: string) => {
-    setMenu(prev => ({
-      ...prev,
-      categories: prev.categories.map(c => {
-        if (c.id === catId) {
-          return {
-            ...c,
-            columns: c.columns.map(col => {
-              if (col.id === colId) {
+            ...item,
+            categories: (item.categories || []).map(c => {
+              if (c.id === editingData.catId) {
                 return {
-                  ...col,
-                  items: col.items.filter(item => item.id !== linkId)
+                  ...c,
+                  columns: c.columns.map(col => {
+                    if (col.id === editingData.colId) {
+                      if (editingData.linkId) {
+                        return {
+                          ...col,
+                          items: col.items.map(it => 
+                            it.id === editingData.linkId 
+                              ? { ...it, title: editingData.title, productId: editingData.productId ? Number(editingData.productId) : null }
+                              : it
+                          )
+                        };
+                      } else {
+                        return {
+                          ...col,
+                          items: [
+                            ...col.items,
+                            {
+                              id: "item_" + Date.now(),
+                              title: editingData.title,
+                              productId: editingData.productId ? Number(editingData.productId) : null
+                            }
+                          ]
+                        };
+                      }
+                    }
+                    return col;
+                  })
                 };
               }
-              return col;
+              return c;
             })
           };
         }
-        return c;
+        return item;
+      })
+    }));
+    setEditingItemType(null);
+    showToast("لینک تغییر یافته ذخیره موقت شد.");
+  };
+
+  const handleDeleteLink = (l1Id: string, catId: string, colId: string, linkId: string) => {
+    setMenu(prev => ({
+      ...prev,
+      items: (prev.items || []).map(item => {
+        if (item.id === l1Id) {
+          return {
+            ...item,
+            categories: (item.categories || []).map(c => {
+              if (c.id === catId) {
+                return {
+                  ...c,
+                  columns: c.columns.map(col => {
+                    if (col.id === colId) {
+                      return {
+                        ...col,
+                        items: col.items.filter(it => it.id !== linkId)
+                      };
+                    }
+                    return col;
+                  })
+                };
+              }
+              return c;
+            })
+          };
+        }
+        return item;
       })
     }));
     showToast("لینک حذف شد.");
   };
 
-
   // --- SAVE DIRECT TO LOCAL STORAGE WITH STRICT VALIDATIONS ---
   const handleFinalSave = () => {
-    // Check if any level 2 category has !== 3 columns in its level 3 structure
-    const invalidCategory = menu.categories.find(c => c.columns.length !== 3);
+    const items = menu.items || [];
     
-    if (invalidCategory) {
-      showToast(
-        `خطا در ذخیره‌سازی: تعداد دسته‌بندی‌های سطح ۳ برای بخش "${invalidCategory.title || "دسته‌بندی بی‌نام"}" باید دقیقاً ۳ ستون باشد. در حال حاضر این بخش ${invalidCategory.columns.length} ستون دارد. لطفاً برطرف کنید تا امکان ذخیره فراهم شود.`,
-        true
-      );
-      return;
+    // Validate that each Category has exactly 3 columns
+    for (const l1 of items) {
+      for (const cat of (l1.categories || [])) {
+        if (cat.columns.length !== 3) {
+          showToast(
+            `خطا در ذخیره‌سازی: تعداد ستون‌های سطح ۳ برای دسته‌بندی "${cat.title || "دسته‌بندی بی‌نام"}" در تب "${l1.title}" حتماً باید دقیقاً ۳ ستون باشد.`,
+            true
+          );
+          return;
+        }
+      }
     }
 
     try {
       localStorage.setItem('matinkala_menu_config', JSON.stringify(menu));
       
       if (isSupabaseConfigured) {
-        // Run as async to not block responsiveness
         (async () => {
           try {
-            // Attempt 1: settings table
             const { error } = await supabase
               .from('settings')
               .upsert({ key: 'menu_config', value: menu }, { onConflict: 'key' });
             
             if (error) {
-              // Attempt 2: menu_config table
               const { error: err2 } = await supabase
                 .from('menu_config')
                 .upsert({ id: 1, config: menu }, { onConflict: 'id' });
@@ -547,12 +919,11 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
         })();
       }
 
-      // Dispatch custom event to notify Header.tsx immediately
       window.dispatchEvent(new Event('matinkala_menu_changed'));
       
       showToast(isSupabaseConfigured 
-        ? "پیکربندی منو با موفقیت در دیتابیس سوپابیس و وب‌سایت ذخیره و اعمال شد. 🎉" 
-        : "پیکربندی منو با موفقیت در این مرورگر ذخیره و اعمال شد. (برای ذخیره دائمی دیتابیس سوپابیس را وصل کنید) 🎉"
+        ? "پیکربندی منوی یکپارچه با موفقیت در دیتابیسی سوپابیس ذخیره و اعمال شد. 🎉" 
+        : "پیکربندی منوی یکپارچه با موفقیت در این مرورگر ذخیره و اعمال شد. 🎉"
       );
     } catch (e) {
       showToast("خطا در ذخیره‌سازی منو.", true);
@@ -566,10 +937,10 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
         <div>
           <h3 className="text-xl font-black text-gray-800 flex items-center gap-2">
             <LayoutGrid className="w-5 h-5 text-[#EF2020]" />
-            تنظیمات منوی اصلی (دسته‌بندی‌ها)
+            تنظیمات منوی اصلی (مدیریت تمامی سطوح هدر)
           </h3>
           <p className="text-xs text-gray-400 font-medium mt-1">
-            یکپارچه‌سازی و بهینه‌سازی پیشرفته منوهای چندسطحی. این تنظیمات مستقیماً منوی هدر وب‌سایت را تغییر می‌دهند.
+            ویرایش، افزودن، حذف و مرتب‌سازی تمامی سطوح منو به صورت یکپارچه و مستقیم. دکمه افزودن سطح ۱ در بالا به شما اجازه ارتقاء می‌دهد.
           </p>
         </div>
         
@@ -609,265 +980,361 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
         )}
       </AnimatePresence>
 
-      {/* Accordion Layout based strictly on the handdrawn schematic */}
-      <div className="space-y-4 max-w-4xl">
+      {/* Unified List of Level 1 items */}
+      <div className="space-y-6 max-w-4xl">
         
-        {/* LEVEL 1 TRIGGER ACCORDION BLOCK */}
-        <div className="bg-white border border-gray-100 rounded-[28px] shadow-sm overflow-hidden">
-          <div 
-            onClick={() => setIsLevel1Open(!isLevel1Open)}
-            className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors border-b border-gray-50"
-          >
-            <div className="flex items-center gap-4">
-              {/* Chevron rotating based on expand state */}
-              <div className="p-2 bg-red-50 text-[#EF2020] rounded-xl transition-transform" style={{ transform: isLevel1Open ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
-                <ChevronLeft className="w-5 h-5" />
-              </div>
-              <div className="flex items-center gap-3">
-                {menu.useDefaultIcon ? (
-                  <LayoutGrid className="w-5 h-5 text-gray-400" />
-                ) : menu.icon ? (
-                  <img src={menu.icon} className="w-5 h-5 object-contain" />
-                ) : (
-                  <ImageIcon className="w-5 h-5 text-gray-300" />
-                )}
-                <div>
-                  <span className="text-sm font-black text-gray-800">{menu.title || <span className="text-gray-300 font-normal">«عنوان منو سفید و خالی است - برای نوشتن کلیک کنید»</span>}</span>
-                  <span className="text-[10px] text-gray-400 mr-2 bg-gray-100 px-2 py-0.5 rounded-full font-bold">بخش بالای بالا (سطح ۱)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Level 1 Toolbar Actions */}
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <button 
-                onClick={handleEditLevel1}
-                className="p-2.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100/50 rounded-xl transition-colors"
-                title="ویرایش نوشته و آیکون منوی اصلی"
-              >
-                <Edit className="w-4.5 h-4.5" />
-              </button>
-              <button 
-                onClick={handleAddNewL2}
-                className="p-2.5 bg-red-50 text-[#EF2020] hover:bg-[#EF2020] hover:text-white rounded-xl transition-colors font-bold flex items-center gap-1.5 text-xs px-3"
-                title="افزودن دسته‌بندی جدید"
-              >
-                <Plus className="w-4 h-4" />
-                <span>افزودن دسته‌بندی</span>
-              </button>
+        {/* ADD NEW LEVEL 1 BLOCK AT THE VERY TOP OF ALL MAIN CATEGORIES AS DIRECTED BY THE USER */}
+        <div className="flex justify-between items-center bg-white p-4 border border-gray-100 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-5 h-5 text-[#EF2020] animate-pulse" />
+            <div>
+              <span className="text-xs font-black text-gray-800">ایجاد سطح هدر جدید (سطح یک)</span>
+              <p className="text-[10px] text-gray-400 font-bold mt-0.5">تب‌های اضافی هدر که در کنار منوی اصلی به نمایش در می‌آیند.</p>
             </div>
           </div>
+          <button 
+            onClick={handleAddNewL1}
+            className="p-2.5 px-5 bg-red-50 text-[#EF2020] hover:bg-[#EF2020] hover:text-white rounded-xl transition-all font-black flex items-center gap-1.5 text-xs text-center shadow-sm"
+          >
+            <Plus className="w-4.5 h-4.5" />
+            <span>افزودن سطح جدید</span>
+          </button>
+        </div>
 
-          {/* Level 1 Sub-items (Level 2 categories) Container */}
-          <AnimatePresence initial={false}>
-            {isLevel1Open && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden bg-gray-50/40"
-              >
-                <div className="p-4 md:p-6 space-y-4">
-                  
-                  {menu.categories.length === 0 ? (
-                    <div className="text-center py-10 border-2 border-dashed border-gray-100 bg-white rounded-2xl flex flex-col items-center justify-center p-4">
-                      <LayoutGrid className="w-10 h-10 text-gray-300 mb-2" />
-                      <p className="text-xs text-gray-400 font-bold">هیچ دسته‌بندی فرعی (سطح ۲) در منو پیکربندی نشده است.</p>
-                      <button 
-                        onClick={handleAddNewL2}
-                        className="mt-3 text-[#EF2020] bg-red-50/50 hover:bg-red-50 px-4 py-2 rounded-xl text-xs font-bold"
-                      >
-                        افزودن اولین بخش
-                      </button>
+        {/* Level 1 Accordion List */}
+        <div className="space-y-4">
+          {(menu.items || []).map((l1Item, l1Idx) => {
+            const isL1Expanded = expandedL1Id === l1Item.id;
+            
+            // Resolve icon
+            let IconComponent = Sparkles;
+            if (l1Item.useDefaultIcon && l1Item.icon) {
+              const res = (LucideIcons as any)[l1Item.icon];
+              if (res) IconComponent = res;
+            }
+
+            return (
+              <div key={l1Item.id} className="bg-white border border-gray-100 rounded-[24px] shadow-sm overflow-hidden transition-all">
+                {/* LEVEL 1 ITEM ROW */}
+                <div 
+                  onClick={() => setExpandedL1Id(isL1Expanded ? null : l1Item.id)}
+                  className={`p-5 flex items-center justify-between cursor-pointer transition-colors ${isL1Expanded ? 'bg-red-50/10 border-b border-gray-100' : 'hover:bg-gray-50/40'}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-red-50 text-[#EF2020] rounded-xl transition-transform" style={{ transform: isL1Expanded ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
+                      <ChevronLeft className="w-4.5 h-4.5" />
                     </div>
-                  ) : (
-                    menu.categories.map((cat) => {
-                      const isExpanded = expandedL2Ids.includes(cat.id);
-                      return (
-                        <div key={cat.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl md:rounded-[24px] overflow-hidden">
-                          
-                          {/* LEVEL 2 CATEGORY ROW */}
-                          <div 
-                            onClick={(e) => toggleL2Expand(cat.id, e)}
-                            className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-all border-b border-gray-50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="p-1.5 bg-gray-50 text-gray-500 rounded-lg transition-transform" style={{ transform: isExpanded ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
-                                <ChevronLeft className="w-4 h-4" />
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {cat.useDefaultIcon ? (
-                                  <div className="w-7 h-7 bg-red-50 rounded-lg flex items-center justify-center text-[#EF2020]">
-                                    <LayoutGrid className="w-4 h-4" />
-                                  </div>
-                                ) : cat.icon ? (
-                                  <img src={cat.icon} className="w-7 h-7 object-contain rounded-lg border border-gray-100 p-0.5" />
-                                ) : (
-                                  <div className="w-7 h-7 bg-gray-50 rounded-lg flex items-center justify-center text-gray-300">
-                                    <ImageIcon className="w-4 h-4" />
-                                  </div>
-                                )}
-                                <span className="text-xs md:text-sm font-black text-gray-700">
-                                  {cat.title || <span className="text-gray-300 font-normal">«عنوان دسته سفید است - برای نوشتن کلیک کنید»</span>}
-                                </span>
-                              </div>
-                            </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-gray-50 border border-gray-100 flex items-center justify-center text-[#EF2020] rounded-xl shrink-0">
+                        {l1Item.useDefaultIcon ? (
+                          <IconComponent className="w-5 h-5" />
+                        ) : l1Item.icon ? (
+                          <img src={l1Item.icon} className="w-7 h-7 object-contain" />
+                        ) : (
+                          <LayoutGrid className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-gray-800">{l1Item.title || "سطح بدون‌نام"}</span>
+                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${l1Idx === 0 ? 'bg-[#EF2020]/10 text-[#EF2020]' : 'bg-gray-100 text-gray-500'}`}>
+                            {l1Idx === 0 ? "طرح منوی اصلی خریدار" : `تب کمکی سطح یک (${l1Idx + 1})`}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-gray-400 font-mono tracking-tight text-right mt-0.5" dir="ltr">{l1Item.url}</p>
+                      </div>
+                    </div>
+                  </div>
 
-                            {/* Level 2 Toolbar */}
-                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                              <button 
-                                onClick={(e) => handleEditL2(cat, e)}
-                                className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button 
-                                onClick={(e) => handleDeleteL2(cat.id, e)}
-                                className="p-2 text-gray-300 hover:text-[#EF2020] hover:bg-red-50 rounded-lg transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                              <div className="w-px h-5 bg-gray-100 mx-1" />
-                              <button 
-                                onClick={() => handleAddCol(cat.id)}
-                                className="p-2 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-900 rounded-lg text-[10px] font-black flex items-center gap-1 transition-all"
-                                title="اضافه کردن ستون سطح ۳ (دسته سوم)"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                                <span>افزودن ستون</span>
-                              </button>
-                            </div>
+                  {/* Level 1 Actions */}
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    {/* Reorder Buttons */}
+                    <button
+                      onClick={() => handleMoveL1Up(l1Idx)}
+                      disabled={l1Idx === 0}
+                      className={`p-2 rounded-lg transition-colors ${l1Idx === 0 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-gray-800 hover:bg-gray-50'}`}
+                      title="حرکت به بالا"
+                    >
+                      <ChevronUp className="w-4.5 h-4.5" />
+                    </button>
+                    <button
+                      onClick={() => handleMoveL1Down(l1Idx)}
+                      disabled={l1Idx === (menu.items || []).length - 1}
+                      className={`p-2 rounded-lg transition-colors ${l1Idx === (menu.items || []).length - 1 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-gray-800 hover:bg-gray-50'}`}
+                      title="حرکت به پایین"
+                    >
+                      <ChevronDown className="w-4.5 h-4.5" />
+                    </button>
+
+                    <div className="w-px h-5 bg-gray-100 mx-1" />
+
+                    <button
+                      onClick={() => handleEditL1(l1Item)}
+                      className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="ویرایش عنوان و پیوند سطح ۱"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    {l1Idx > 0 && (
+                      <button
+                        onClick={() => handleDeleteL1(l1Item.id)}
+                        className="p-2 text-gray-300 hover:text-[#EF2020] hover:bg-red-50 rounded-lg transition-colors"
+                        title="حذف سطح ۱"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    <div className="w-px h-5 bg-gray-100 mx-1" />
+
+                    <button
+                      onClick={() => handleAddNewL2(l1Item.id)}
+                      className="p-2 px-3 bg-red-50 hover:bg-[#EF2020] hover:text-white text-[#EF2020] text-[10px] font-black rounded-lg flex items-center gap-1 transition-all"
+                      title="افزودن دسته‌بندی سطح دوم"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>افزودن دسته‌بندی (سطح ۲)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* LEVEL 2 CHILDREN PANEL */}
+                <AnimatePresence initial={false}>
+                  {isL1Expanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden bg-gray-50/30"
+                    >
+                      <div className="p-4 md:p-6 space-y-4 border-t border-gray-100">
+                        {(!l1Item.categories || l1Item.categories.length === 0) ? (
+                          <div className="text-center py-8 border border-dashed border-gray-200 bg-white rounded-xl flex flex-col items-center justify-center p-4">
+                            <LayoutGrid className="w-10 h-10 text-gray-300 mb-2" />
+                            <p className="text-xs text-gray-400 font-bold">هیچ زیرمجموعه دسته‌بندی (سطح ۲) در این بخش پیکربندی نشده است.</p>
+                            <button
+                              onClick={() => handleAddNewL2(l1Item.id)}
+                              className="mt-3 bg-red-50 text-[#EF2020] hover:bg-[#EF2020] hover:text-white px-4 py-2 rounded-xl text-xs font-black transition-all"
+                            >
+                              افزودن دسته‌بندی سطح ۲
+                            </button>
                           </div>
+                        ) : (
+                          l1Item.categories.map((cat, catIdx) => {
+                            const isL2Expanded = expandedL2Ids.includes(cat.id);
+                            
+                            let CatIcon = LayoutGrid;
+                            if (cat.useDefaultIcon && cat.icon) {
+                              const res = (LucideIcons as any)[cat.icon];
+                              if (res) CatIcon = res;
+                            }
 
-                          {/* LEVEL 3 EXPANDABLE AREA - Grid of Columns */}
-                          <AnimatePresence initial={false}>
-                            {isExpanded && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden bg-gray-50/20"
-                              >
-                                <div className="p-4 md:p-6">
-                                  {/* Info Notice */}
-                                  <div className="mb-4 bg-orange-50/50 border border-orange-100/80 p-3 rounded-xl flex items-start gap-2.5">
-                                    <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-                                    <p className="text-[10px] md:text-xs text-orange-700 font-bold leading-relaxed">
-                                      بر اساس قوانین وب‌سایت، تنوع دسته‌بندی‌های سطح ۳ برای نمایش بهینه‌ی مگامنو در هدر حتماً باید <strong className="text-orange-900 text-xs font-black">دقیقاً ۳ ستون</strong> باشد (نه کمتر و نه بیشتر). لطفاً این قانون را برای پیکربندی نهایی رعایت کنید.
-                                    </p>
+                            return (
+                              <div key={cat.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                                {/* LEVEL 2 ROW */}
+                                <div 
+                                  onClick={(e) => toggleL2Expand(cat.id, e)}
+                                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50/45 transition-colors border-b border-gray-50"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-1.5 bg-gray-50 text-gray-500 rounded-lg transition-transform" style={{ transform: isL2Expanded ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
+                                      <ChevronLeft className="w-4.5 h-4.5" />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-[#EF2020] shrink-0">
+                                        {cat.useDefaultIcon ? (
+                                          <CatIcon className="w-4 h-4" />
+                                        ) : cat.icon ? (
+                                          <img src={cat.icon} className="w-6 h-6 object-contain" />
+                                        ) : (
+                                          <LayoutGrid className="w-4 h-4" />
+                                        )}
+                                      </div>
+                                      <div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-xs md:text-sm font-black text-gray-700">{cat.title || "دسته‌بندی بدون‌عنوان"}</span>
+                                          <span className="text-[9px] bg-red-50 text-[#EF2020] px-2 py-0.5 rounded-full font-black">
+                                            دسته‌بندی سطح دو ({catIdx + 1})
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
 
-                                  {/* Grid Container */}
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                    {cat.columns.map((col, cIdx) => (
-                                      <div key={col.id} className="bg-white border border-gray-100/60 p-4 rounded-xl shadow-sm flex flex-col justify-between relative min-h-[220px]">
-                                        
-                                        {/* Column Header */}
-                                        <div>
-                                          <div className="flex items-center justify-between pb-3 border-b border-gray-50 mb-3">
-                                            <span className="text-[11px] font-black text-gray-800 flex items-center gap-1.5">
-                                              <span className="w-2 h-2 rounded-full bg-[#EF2020]/80 shrink-0" />
-                                              {col.title}
-                                            </span>
-                                            <div className="flex items-center gap-1">
-                                              <button 
-                                                onClick={() => handleEditCol(cat.id, col)}
-                                                className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                                              >
-                                                <Edit className="w-3 h-3" />
-                                              </button>
-                                              <button 
-                                                onClick={() => handleDeleteCol(cat.id, col.id)}
-                                                className="p-1 text-gray-300 hover:text-[#EF2020] rounded"
-                                              >
-                                                <Trash2 className="w-3 h-3" />
-                                              </button>
-                                            </div>
-                                          </div>
+                                  {/* Level 2 Actions */}
+                                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                      onClick={() => handleMoveL2Up(l1Item.id, catIdx)}
+                                      disabled={catIdx === 0}
+                                      className={`p-1.5 rounded-lg transition-colors ${catIdx === 0 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-gray-800 hover:bg-gray-50'}`}
+                                      title="حرکت به بالا"
+                                    >
+                                      <ChevronUp className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleMoveL2Down(l1Item.id, catIdx)}
+                                      disabled={catIdx === l1Item.categories.length - 1}
+                                      className={`p-1.5 rounded-lg transition-colors ${catIdx === l1Item.categories.length - 1 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-gray-800 hover:bg-gray-50'}`}
+                                      title="حرکت به پایین"
+                                    >
+                                      <ChevronDown className="w-4 h-4" />
+                                    </button>
 
-                                          {/* Link Items under this Column */}
-                                          <div className="space-y-1.5">
-                                            {col.items.length === 0 ? (
-                                              <div className="text-center py-6 text-[10px] text-gray-300 font-bold">
-                                                بدون آیتم
-                                              </div>
-                                            ) : (
-                                              col.items.map((item) => {
-                                                const linkedProduct = products.find(p => p.id === item.productId);
-                                                return (
-                                                  <div 
-                                                    key={item.id} 
-                                                    className="p-2 bg-gray-50 hover:bg-gray-100/50 rounded-lg flex items-center justify-between text-[11px] text-gray-600 transition-colors group/link"
-                                                  >
-                                                    <div className="flex flex-col text-right">
-                                                      <span className="font-extrabold text-gray-700">{item.title}</span>
-                                                      {linkedProduct && (
-                                                        <span className="text-[8px] text-gray-400 mt-0.5">
-                                                          لینک به: {linkedProduct.title}
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                    <div className="opacity-0 group-hover/link:opacity-100 flex items-center gap-1 transition-opacity">
-                                                      <button 
-                                                        onClick={() => handleEditLink(cat.id, col.id, item)}
-                                                        className="p-0.5 text-gray-400 hover:text-gray-600"
-                                                      >
-                                                        <Edit className="w-3 h-3" />
-                                                      </button>
-                                                      <button 
-                                                        onClick={() => handleDeleteLink(cat.id, col.id, item.id)}
-                                                        className="p-0.5 text-gray-400 hover:text-[#EF2020]"
-                                                      >
-                                                        <Trash2 className="w-3 h-3" />
-                                                      </button>
-                                                    </div>
-                                                  </div>
-                                                );
-                                              })
-                                            )}
-                                          </div>
-                                        </div>
+                                    <div className="w-px h-5 bg-gray-100 mx-1" />
 
-                                        {/* Add level 3 link button inside column */}
-                                        <button
-                                          onClick={() => handleAddLink(cat.id, col.id)}
-                                          className="mt-4 w-full flex items-center justify-center gap-1 p-2 bg-gray-50 hover:bg-red-50/50 hover:text-[#EF2020] text-gray-400 rounded-lg text-[10px] font-black transition-all border border-dashed border-gray-100 group"
-                                        >
-                                          <Plus className="w-3 h-3 group-hover:scale-110" />
-                                          <span>افزودن نوشته</span>
-                                        </button>
-                                      </div>
-                                    ))}
+                                    <button
+                                      onClick={() => handleEditL2(l1Item.id, cat)}
+                                      className="p-1.5 text-gray-400 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                                      title="ویرایش عنوان"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteL2(l1Item.id, cat.id)}
+                                      className="p-1.5 text-gray-300 hover:text-[#EF2020] hover:bg-red-50 rounded-lg transition-colors"
+                                      title="حذف دسته‌بندی"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
 
-                                    {/* Empty warning / placeholder if less than 3 columns */}
-                                    {cat.columns.length < 3 && (
-                                      <div className="bg-red-50/50 border-2 border-dashed border-red-100 p-4 rounded-xl flex flex-col items-center justify-center text-center text-xs text-red-700 select-none">
-                                        <AlertTriangle className="w-8 h-8 text-[#EF2020] mb-2" />
-                                        <p className="font-black">ستون کمه!</p>
-                                        <p className="text-[10px] text-red-500 font-bold mt-1">تعداد ستون‌ها {cat.columns.length} است، باید دقیقاً ۳ ستون زیر این بخش باشد.</p>
-                                        <button 
-                                          onClick={() => handleAddCol(cat.id)}
-                                          className="mt-3 bg-red-100 hover:bg-red-200 text-[#EF2020] font-black text-[10px] px-3 py-1.5 rounded-lg"
-                                        >
-                                          ایجاد ستون سوم جدید
-                                        </button>
-                                      </div>
-                                    )}
+                                    <div className="w-px h-5 bg-gray-100 mx-1" />
+
+                                    <button 
+                                      onClick={() => handleAddCol(l1Item.id, cat.id)}
+                                      className="p-1.5 px-2 bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-900 rounded-lg text-[9px] font-black flex items-center gap-1 transition-all"
+                                      title="افزودن ستون سطح ۳"
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                      <span>افزودن ستون (سطح ۳)</span>
+                                    </button>
                                   </div>
                                 </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      );
-                    })
-                  )}
 
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                                {/* LEVEL 3 EXPENDABLE GRID */}
+                                <AnimatePresence initial={false}>
+                                  {isL2Expanded && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden bg-gray-50/10"
+                                    >
+                                      <div className="p-4 md:p-6">
+                                        <div className="mb-4 bg-orange-50/50 border border-orange-100/80 p-3 rounded-xl flex items-start gap-2.5">
+                                          <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                                          <p className="text-[10px] md:text-xs text-orange-700 font-bold leading-relaxed">
+                                            برای چیدمان منظم وب‌سایت، این بخش باید <strong className="text-orange-900 font-black">سازگار با دقیقا ۳ ستون</strong> باشد (نه کمتر و نه بیشتر).
+                                          </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                          {(cat.columns || []).map((col, colIdx) => (
+                                            <div key={col.id} className="bg-white border border-gray-100 p-4 rounded-xl shadow-sm flex flex-col justify-between relative min-h-[220px]">
+                                              <div>
+                                                <div className="flex items-center justify-between pb-3 border-b border-gray-50 mb-3">
+                                                  <span className="text-[11px] font-black text-gray-800 flex items-center gap-1.5">
+                                                    <span className="w-2 h-2 rounded-full bg-[#EF2020]/80 shrink-0" />
+                                                    {col.title}
+                                                  </span>
+                                                  <div className="flex items-center gap-1">
+                                                    <button 
+                                                      onClick={() => handleEditCol(l1Item.id, cat.id, col)}
+                                                      className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                                                    >
+                                                      <Edit className="w-3 h-3" />
+                                                    </button>
+                                                    <button 
+                                                      onClick={() => handleDeleteCol(l1Item.id, cat.id, col.id)}
+                                                      className="p-1 text-gray-300 hover:text-[#EF2020] rounded"
+                                                    >
+                                                      <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                  </div>
+                                                </div>
+
+                                                <div className="space-y-1.5">
+                                                  {(!col.items || col.items.length === 0) ? (
+                                                    <div className="text-center py-6 text-[10px] text-gray-300 font-bold">
+                                                      بدون آیتم جهت ارجاع
+                                                    </div>
+                                                  ) : (
+                                                    col.items.map((item) => {
+                                                      const linkedProduct = products.find(p => p.id === item.productId);
+                                                      return (
+                                                        <div 
+                                                          key={item.id} 
+                                                          className="p-2 bg-gray-50 hover:bg-gray-100/50 rounded-lg flex items-center justify-between text-[11px] text-gray-600 transition-colors group/link"
+                                                        >
+                                                          <div className="flex flex-col text-right">
+                                                            <span className="font-extrabold text-gray-700">{item.title}</span>
+                                                            {linkedProduct && (
+                                                              <span className="text-[8px] text-gray-400 mt-0.5">
+                                                                لینک به محصول: {linkedProduct.title}
+                                                               </span>
+                                                            )}
+                                                          </div>
+                                                          <div className="opacity-0 group-hover/link:opacity-100 flex items-center gap-1 transition-opacity">
+                                                            <button 
+                                                              onClick={() => handleEditLink(l1Item.id, cat.id, col.id, item)}
+                                                              className="p-0.5 text-gray-400 hover:text-gray-600"
+                                                            >
+                                                              <Edit className="w-3 h-3" />
+                                                            </button>
+                                                            <button 
+                                                              onClick={() => handleDeleteLink(l1Item.id, cat.id, col.id, item.id)}
+                                                              className="p-0.5 text-gray-400 hover:text-[#EF2020]"
+                                                            >
+                                                              <Trash2 className="w-3 h-3" />
+                                                            </button>
+                                                          </div>
+                                                        </div>
+                                                      );
+                                                    })
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              <button
+                                                onClick={() => handleAddLink(l1Item.id, cat.id, col.id)}
+                                                className="mt-4 w-full flex items-center justify-center gap-1 p-2 bg-gray-50 hover:bg-red-50/50 hover:text-[#EF2020] text-gray-400 rounded-lg text-[10px] font-black transition-all border border-dashed border-gray-100 group"
+                                              >
+                                                <Plus className="w-3 h-3 group-hover:scale-110" />
+                                                <span>افزودن نوشته (سطح ۴)</span>
+                                              </button>
+                                            </div>
+                                          ))}
+
+                                          {/* Placeholder if column setup is less than 3 */}
+                                          {(cat.columns || []).length < 3 && (
+                                            <div className="bg-red-50/50 border-2 border-dashed border-red-100 p-4 rounded-xl flex flex-col items-center justify-center text-center text-xs text-red-700">
+                                              <AlertTriangle className="w-7 h-7 text-[#EF2020] mb-2" />
+                                              <span className="font-black">ستون کمه!</span>
+                                              <button
+                                                onClick={() => handleAddCol(l1Item.id, cat.id)}
+                                                className="mt-3 bg-red-100 hover:bg-red-200 text-[#EF2020] font-black text-[9px] px-3 py-1 rounded-lg"
+                                              >
+                                                ایجاد ستون سوم جدید
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
+
       </div>
 
       {/* --- MODAL EDIT DIALOG --- */}
@@ -886,7 +1353,7 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
                 {editingItemType === 'level1' && "ویرایش بخش هدر بالا (سطح ۱)"}
                 {editingItemType === 'level2' && "ویرایش دسته‌بندی سطح دوم"}
                 {editingItemType === 'level3_col' && "ویرایش عنوان ستون سطح سوم"}
-                {editingItemType === 'level3_link' && (editingData.linkId ? "ویرایش لینک محصول (سطح سوم)" : "افزودن کلیک و لینک محصول جدید")}
+                {editingItemType === 'level3_link' && (editingData?.linkId ? "ویرایش لینک محصول (سطح چهارم)" : "افزودن لینک محصول جدید")}
               </h4>
 
               <div className="space-y-5">
@@ -971,6 +1438,22 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
                   </div>
                 )}
 
+                {/* Redirect URL Field (Optional for Level 1) */}
+                {editingItemType === 'level1' && (
+                  <div className="space-y-2 pt-2 border-t border-gray-50">
+                    <label className="text-xs font-black text-gray-500 block">لینک یا آدرس ارجاع (مانند آدرس اینترنتی یا شناسه)</label>
+                    <input
+                      type="text"
+                      value={editingData?.url || ''}
+                      placeholder="مانند # یا /special-offers..."
+                      onChange={(e) => setEditingData((prev: any) => ({ ...prev, url: e.target.value }))}
+                      className="w-full bg-gray-50 border border-gray-100 px-4 py-3 text-xs md:text-sm rounded-xl outline-none focus:border-red-400 font-mono text-left"
+                      dir="ltr"
+                    />
+                    <p className="text-[10px] text-gray-400 font-bold text-right">آدرسی که با کلیک کاربر روی این منو در هدر او را به آنجا هدایت می‌کند.</p>
+                  </div>
+                )}
+
                 {/* Level 3 Link product linkage selector */}
                 {editingItemType === 'level3_link' && (
                   <div className="space-y-2 pt-2 border-t border-gray-50">
@@ -980,16 +1463,17 @@ export default function MenuManagement({ products = [] }: { products?: ProductDa
                       onChange={(e) => setEditingData((prev: any) => ({ ...prev, productId: e.target.value ? Number(e.target.value) : null }))}
                       className="w-full bg-gray-50 border border-gray-100 px-4 py-3 text-xs md:text-sm rounded-xl outline-none focus:border-red-400 font-extrabold"
                     >
-                      <option value="">-- فاقد لینک ارجاع مستقیم (فقط متن دکمه) --</option>
+                      <option value="">-- فاقد لینک ارجاع مستقیم (فقط متن ساده) --</option>
                       {products.map(p => (
                         <option key={p.id} value={p.id}>{p.title} ({p.price.toLocaleString('fa-IR')} تومان)</option>
                       ))}
                     </select>
                     <p className="text-[10px] text-gray-400 font-bold">
-                      وقتی کاربر بر روی این گزینه کلیک کند، فوراً به صفحه جزئیات آن محصول فرستاده خواهد شد.
+                      با انتخاب محصول، کلیک کاربر بر روی این متن او را مستقیماً به جزئیات آن کالا هدایت می‌کند.
                     </p>
                   </div>
                 )}
+
               </div>
 
               {/* Action operations */}
