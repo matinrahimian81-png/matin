@@ -9,7 +9,7 @@ import {
   Bell, User, LogOut, Camera, ChevronLeft, 
   Plus, ArrowUpRight, ArrowDownLeft, X, ShoppingCart,
   ShieldCheck, ShieldAlert, Mail, Lock, Eye, EyeOff,
-  Image as ImageIcon, Move, Settings, Check, ShoppingBag
+  Image as ImageIcon, Move, Settings, Check, ShoppingBag, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Cropper from 'react-easy-crop';
@@ -1063,27 +1063,6 @@ function ProductManagement({ onProductChange }: { onProductChange?: () => void }
                         >
                           <X className="w-5 h-5 pointer-events-none" strokeWidth={3} />
                         </button>
-                        
-                        {/* Confirmation Overlay for individual product */}
-                        {deletingId === p.id && (
-                          <div className="absolute inset-0 bg-white/95 backdrop-blur-sm z-[100] flex flex-col items-center justify-center gap-2 p-2 rounded-2xl border-2 border-red-100">
-                            <span className="text-[10px] font-black text-gray-900 text-center">مطمئنید؟</span>
-                            <div className="flex gap-2">
-                              <button 
-                                onClick={() => confirmDelete(p.id)}
-                                className="px-3 py-1 bg-red-600 text-white text-[9px] font-black rounded-lg hover:bg-red-700 shadow-sm"
-                              >
-                                بله، حذف شود
-                              </button>
-                              <button 
-                                onClick={() => setDeletingId(null)}
-                                className="px-3 py-1 bg-gray-100 text-gray-600 text-[9px] font-black rounded-lg hover:bg-gray-200"
-                              >
-                                انصراف
-                              </button>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   ))
@@ -1130,6 +1109,61 @@ function ProductManagement({ onProductChange }: { onProductChange?: () => void }
           </div>
         </div>
       </div>
+
+      {/* Fixed Fullscreen Modal for Product Deletion Confirmation */}
+      <AnimatePresence>
+        {deletingId !== null && (
+          <div 
+            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            dir="rtl"
+            onClick={() => !loading && setDeletingId(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col items-center text-center space-y-5 relative"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner">
+                <Trash2 className="w-8 h-8 text-red-500" />
+              </div>
+
+              <div className="space-y-2 w-full">
+                <h3 className="text-base sm:text-lg font-black text-gray-900">آیا از حذف این محصول اطمینان دارید؟</h3>
+                {products.find(p => p.id === deletingId) && (
+                  <p className="text-xs sm:text-sm font-bold text-gray-700 bg-gray-50 py-2.5 px-3.5 rounded-xl line-clamp-2 border border-gray-100">
+                    {products.find(p => p.id === deletingId)?.title}
+                  </p>
+                )}
+                <p className="text-xs text-gray-400 font-medium">
+                  این عملیات غیرقابل بازگشت است و اطلاعات محصول از سرور حذف خواهد شد.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 w-full pt-2">
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => confirmDelete(deletingId)}
+                  className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs sm:text-sm font-black transition-colors shadow-lg shadow-red-200 disabled:opacity-50 cursor-pointer"
+                >
+                  {loading ? 'در حال حذف...' : 'بله، حذف شود'}
+                </button>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => setDeletingId(null)}
+                  className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-2xl text-xs sm:text-sm font-black transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  انصراف
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -1593,17 +1627,6 @@ function SliderManagement() {
                          </button>
                       </div>
 
-                      {deletingSlideId === slide.id && (
-                        <div className="absolute inset-0 bg-white/95 backdrop-blur-md z-40 flex flex-col items-center justify-center p-6 text-center">
-                           <ShieldAlert className="w-12 h-12 text-red-500 mb-2" />
-                           <p className="text-sm font-black text-gray-900 mb-4">واقعاً حذف شود؟</p>
-                           <div className="flex gap-2">
-                             <button onClick={() => confirmDeleteSlide(slide.id)} className="bg-red-500 text-white px-6 py-2 rounded-xl text-xs font-black shadow-lg">حذف قطعی</button>
-                             <button onClick={() => setDeletingSlideId(null)} className="bg-gray-100 text-gray-600 px-6 py-2 rounded-xl text-xs font-black">انصراف</button>
-                           </div>
-                        </div>
-                      )}
-
                       <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-black text-gray-900 border border-white shadow-xl">
                         #{idx + 1}
                       </div>
@@ -1663,6 +1686,59 @@ function SliderManagement() {
                 </div>
               ))
             )}
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Fixed Fullscreen Modal for Slide Deletion Confirmation */}
+      <AnimatePresence>
+        {deletingSlideId !== null && (
+          <div 
+            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            dir="rtl"
+            onClick={() => setDeletingSlideId(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col items-center text-center space-y-5 relative"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shadow-inner">
+                <Trash2 className="w-8 h-8 text-red-500" />
+              </div>
+
+              <div className="space-y-2 w-full">
+                <h3 className="text-base sm:text-lg font-black text-gray-900">آیا از حذف این اسلاید اطمینان دارید؟</h3>
+                {slides.find(s => s.id === deletingSlideId) && (
+                  <p className="text-xs sm:text-sm font-bold text-gray-700 bg-gray-50 py-2.5 px-3.5 rounded-xl line-clamp-1 border border-gray-100">
+                    {slides.find(s => s.id === deletingSlideId)?.title || `اسلاید شماره ${slides.findIndex(s => s.id === deletingSlideId) + 1}`}
+                  </p>
+                )}
+                <p className="text-xs text-gray-400 font-medium">
+                  این اسلاید برای همیشه از اسلایدر بنر صفحه اصلی حذف خواهد شد.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 w-full pt-2">
+                <button
+                  type="button"
+                  onClick={() => confirmDeleteSlide(deletingSlideId)}
+                  className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs sm:text-sm font-black transition-colors shadow-lg shadow-red-200 cursor-pointer"
+                >
+                  بله، حذف شود
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeletingSlideId(null)}
+                  className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-2xl text-xs sm:text-sm font-black transition-colors cursor-pointer"
+                >
+                  انصراف
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
       </AnimatePresence>
