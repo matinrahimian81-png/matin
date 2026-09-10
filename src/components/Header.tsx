@@ -87,10 +87,10 @@ export default function Header({
   }, []);
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-[40] bg-white font-sans w-full shadow-[0_1px_4px_rgba(0,0,0,0.12)] md:shadow-none">
+    <header className="sticky top-0 left-0 right-0 z-[40] bg-white font-sans w-full shadow-[0_1px_4px_rgba(0,0,0,0.12)] lg:shadow-none">
       {/* Top bar - Hidden on mobile */}
-      <div className="hidden md:block bg-[#F0F0F1] text-gray-500 text-[10px] md:text-xs py-2 px-4 border-b border-gray-100">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex justify-between items-center">
+      <div className="hidden lg:block bg-[#F0F0F1] text-gray-500 text-[10px] lg:text-xs py-2 px-4 border-b border-gray-100">
+        <div className="max-w-[1440px] mx-auto px-4 lg:px-6 xl:px-8 flex justify-between items-center">
           <div className="font-semibold">به متین‌کالا خوش آمدید</div>
           <div className="flex items-center gap-6 font-semibold">
             <a href="#" className="hover:text-gray-900 transition-colors">فروش در متین‌کالا</a>
@@ -101,11 +101,11 @@ export default function Header({
       </div>
 
       {/* Main header row */}
-      <div className="bg-white h-[56px] px-3 md:px-0 md:h-[80px] border-b border-white md:border-gray-100 relative z-10 w-full flex items-center">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between w-full">
+      <div className="bg-white h-[56px] px-3 lg:px-0 lg:h-[80px] border-b border-white lg:border-gray-100 relative z-10 w-full flex items-center">
+        <div className="max-w-[1440px] mx-auto px-4 lg:px-6 xl:px-8 flex items-center justify-between w-full">
           
           {/* MOBILE LAYOUT CONTENT */}
-          <div className="flex items-center justify-between w-full md:hidden h-full">
+          <div className="flex items-center justify-between w-full lg:hidden h-full">
             <button 
               onClick={onMenuClick}
               className="w-10 h-10 flex items-center justify-center text-gray-800"
@@ -152,7 +152,7 @@ export default function Header({
           </div>
 
           {/* DESKTOP LAYOUT CONTENT */}
-          <div className="hidden md:flex items-center h-full w-full justify-between">
+          <div className="hidden lg:flex items-center h-full w-full justify-between">
             {/* Right Side: Logo and Search */}
             <div className="flex items-center gap-2 lg:gap-4 min-w-0 pr-0 lg:pr-2">
               <div className="flex-shrink-0 cursor-pointer" onClick={onLogoClick}>
@@ -223,7 +223,7 @@ export default function Header({
       </div>
 
       {/* MOBILE SEARCH ROW */}
-      <div className="md:hidden bg-white h-[60px] flex items-center px-[12px] border-b border-gray-100">
+      <div className="lg:hidden bg-white h-[60px] flex items-center px-[12px] border-b border-gray-100">
         <div className="flex items-center bg-[#F5F5F5] h-[44px] w-full rounded-[22px] px-[12px]">
           <Search className="w-[18px] h-[18px] text-[#999] shrink-0" />
           <input
@@ -237,7 +237,7 @@ export default function Header({
       </div>
 
       {/* Nav Row - Hidden on mobile */}
-      <div className="hidden md:block bg-white px-4 border-b border-gray-100">
+      <div className="hidden lg:block bg-white px-4 border-b border-gray-100">
         <div 
           ref={navRowRef}
           onMouseLeave={() => {
@@ -245,7 +245,7 @@ export default function Header({
               setActiveL1Id(null);
             }
           }}
-          className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 flex items-center h-[40px] justify-start relative whitespace-nowrap"
+          className="max-w-[1440px] mx-auto px-4 lg:px-6 xl:px-8 flex items-center h-[40px] justify-start relative whitespace-nowrap"
         >
           {/* Main button (Item 0) */}
           {menu.items && menu.items.length > 0 && (
@@ -366,7 +366,7 @@ export default function Header({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full right-4 lg:right-8 w-[950px] lg:w-[1000px] xl:w-[1100px] bg-white shadow-2xl rounded-b-2xl border border-gray-100 flex h-[450px] overflow-hidden z-[1001]"
+                    className="absolute top-full right-4 lg:right-8 left-4 lg:left-8 bg-white shadow-2xl rounded-b-2xl border border-gray-100 flex h-[450px] overflow-hidden z-[1001]"
                   >
                     {/* Category list (Right column of Mega Menu) */}
                     <div className="w-1/4 border-l border-gray-100 bg-gray-50/50 py-4 overflow-y-auto relative z-10 select-none">

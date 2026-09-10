@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from './lib/supabase';
 import Header from './components/Header';
+import { DEFAULT_MENU_CONFIG, normalizeMenuConfig } from './components/MenuManagement';
 import BottomNavigation from './components/BottomNavigation';
 import MobileDrawer from './components/MobileDrawer';
 import Hero from './components/Hero';
@@ -49,54 +50,96 @@ export default function App() {
       setUser(JSON.parse(savedUser));
     }
 
-    if (!isSupabaseConfigured) return;
-
     const init = async () => {
       try {
-        const { supabaseService } = await import('./services/supabaseService');
-        
-        // Fetch Auth
-        const currentUser = await supabaseService.getCurrentUser();
-        if (currentUser) {
-          setUser(currentUser);
-          localStorage.setItem('matinkala_user', JSON.stringify(currentUser));
+        // Ensure baseline menu config
+        const cachedMenu = localStorage.getItem('matinkala_menu_config');
+        if (!cachedMenu) {
+          localStorage.setItem('matinkala_menu_config', JSON.stringify(normalizeMenuConfig(DEFAULT_MENU_CONFIG)));
         }
-        
-        supabaseService.onAuthStateChange((_event, session) => {
-          const u = session?.user || null;
-          if (u) {
-            setUser(u);
-            localStorage.setItem('matinkala_user', JSON.stringify(u));
-          } else {
-            const saved = localStorage.getItem('matinkala_user');
-            if (saved) {
-              const parsed = JSON.parse(saved);
-              if (parsed.email === 'admin@matinkala.com') return;
-            }
-            setUser(null);
-            localStorage.removeItem('matinkala_user');
-          }
-        });
 
-        // Fetch Products
-        try {
-          const dbProducts = await supabaseService.getProducts();
-          if (dbProducts) {
-            setProducts(dbProducts);
-            console.log(`Loaded ${dbProducts.length} products from database`);
+        if (isSupabaseConfigured) {
+          const { supabaseService } = await import('./services/supabaseService');
+          const { supabase } = await import('./lib/supabase');
+
+          // Fetch Auth
+          try {
+            const currentUser = await supabaseService.getCurrentUser();
+            if (currentUser) {
+              setUser(currentUser);
+              localStorage.setItem('matinkala_user', JSON.stringify(currentUser));
+            }
+          } catch (e) {
+            console.error('Error loading current user:', e);
           }
-        } catch (dbErr) {
-          console.error('Failed to load products from database:', dbErr);
-          // If the table doesn't exist yet, we can keep the local ones
-          // but if we are here and Supabase is configured, we probably want to know why it failed.
-          // For now, let's keep it empty if it failed but was configured.
+
+          supabaseService.onAuthStateChange((_event, session) => {
+            const u = session?.user || null;
+            if (u) {
+              setUser(u);
+              localStorage.setItem('matinkala_user', JSON.stringify(u));
+            } else {
+              const saved = localStorage.getItem('matinkala_user');
+              if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.email === 'admin@matinkala.com') return;
+              }
+              setUser(null);
+              localStorage.removeItem('matinkala_user');
+            }
+          });
+
+          // Fetch menus from database settings or menu_config table
+          try {
+            const { data, error } = await supabase
+              .from('settings')
+              .select('value')
+              .eq('key', 'menu_config')
+              .maybeSingle();
+
+            if (!error && data?.value) {
+              const normalized = normalizeMenuConfig(data.value);
+              localStorage.setItem('matinkala_menu_config', JSON.stringify(normalized));
+            } else {
+              const { data: menuData, error: menuErr } = await supabase
+                .from('menu_config')
+                .select('config')
+                .limit(1)
+                .maybeSingle();
+
+              if (!menuErr && menuData?.config) {
+                const normalized = normalizeMenuConfig(menuData.config);
+                localStorage.setItem('matinkala_menu_config', JSON.stringify(normalized));
+              }
+            }
+          } catch (menuErr) {
+            console.error('Error fetching menu config from db:', menuErr);
+          }
+
+          // Fetch Products
+          try {
+            const dbProducts = await supabaseService.getProducts();
+            if (dbProducts) {
+              setProducts(dbProducts);
+            }
+          } catch (dbErr) {
+            console.error('Failed to load products from database:', dbErr);
+            setProducts([]);
+          }
+        } else {
           setProducts([]);
         }
       } catch (err) {
-        console.error('Init error:', err);
+        console.error('Core App Init failed, falling back:', err);
         setProducts([]);
       } finally {
-        setLoadingProducts(false);
+        // Trigger menu changed event so that components read and set the correct state
+        window.dispatchEvent(new Event('matinkala_menu_changed'));
+        
+        // Give the spinner a nice satisfying premium 1.2s minimum duration so it doesn't flash
+        setTimeout(() => {
+          setLoadingProducts(false);
+        }, 1200);
       }
     };
 
@@ -162,6 +205,44 @@ export default function App() {
 
   const wishlistItems = activeProducts.filter(p => wishlist.includes(p.id));
 
+  if (loadingProducts) {
+    return (
+      <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#F5F5F5]" dir="rtl">
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          {/* Pulsing beautiful logo */}
+          <div className="text-[#EF2020] text-5xl font-black italic tracking-tighter mb-8 select-none animate-pulse">
+            MATINKALA
+          </div>
+          
+          {/* Infinite spinner container */}
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 border-4 border-gray-200 rounded-full" />
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              className="absolute inset-0 border-4 border-[#EF2020] border-t-transparent rounded-full"
+            />
+          </div>
+
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-700 font-extrabold text-sm tracking-wide"
+          >
+            در حال بارگذاری اطلاعات متین‌کالا...
+          </motion.p>
+          <p className="text-gray-400 font-bold text-xs mt-2">لطفاً شکیبا باشید</p>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] selection:bg-red-100 selection:text-red-900" dir="rtl">
       <Header 
@@ -209,6 +290,12 @@ export default function App() {
         onClose={() => setIsDrawerOpen(false)} 
         user={user}
         onUserClick={() => setIsDashboardOpen(true)}
+        onProductClick={(id) => {
+          setSelectedProductId(id);
+          setIsDashboardOpen(false);
+          setIsCartOpen(false);
+          setIsWishlistOpen(false);
+        }}
       />
 
       {/* Drawers and Overlays */}
