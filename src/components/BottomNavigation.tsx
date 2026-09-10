@@ -1,4 +1,4 @@
-import { Home, Search, ShoppingBag, Heart, User } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingBag, Heart, User } from 'lucide-react';
 
 export default function BottomNavigation({ 
   activeTab, 
@@ -11,7 +11,7 @@ export default function BottomNavigation({
 }) {
   const tabs = [
     { id: 'home', label: 'خانه', icon: Home },
-    { id: 'search', label: 'جستجو', icon: Search },
+    { id: 'categories', label: 'دسته‌بندی‌ها', icon: LayoutGrid },
     { id: 'orders', label: 'سفارش‌ها', icon: ShoppingBag, badge: orderCount },
     { id: 'wishlist', label: 'علاقه‌مندی', icon: Heart },
     { id: 'profile', label: 'پروفایل', icon: User },

@@ -100,6 +100,7 @@ export default function App() {
             if (!error && data?.value) {
               const normalized = normalizeMenuConfig(data.value);
               localStorage.setItem('matinkala_menu_config', JSON.stringify(normalized));
+              window.dispatchEvent(new Event('matinkala_menu_changed'));
             } else {
               const { data: menuData, error: menuErr } = await supabase
                 .from('menu_config')
@@ -110,6 +111,7 @@ export default function App() {
               if (!menuErr && menuData?.config) {
                 const normalized = normalizeMenuConfig(menuData.config);
                 localStorage.setItem('matinkala_menu_config', JSON.stringify(normalized));
+                window.dispatchEvent(new Event('matinkala_menu_changed'));
               }
             }
           } catch (menuErr) {
@@ -287,7 +289,12 @@ export default function App() {
 
       <MobileDrawer 
         isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
+        onClose={() => {
+          setIsDrawerOpen(false);
+          if (activeTab === 'categories') {
+            setActiveTab('home');
+          }
+        }} 
         user={user}
         onUserClick={() => setIsDashboardOpen(true)}
         onProductClick={(id) => {
@@ -295,6 +302,12 @@ export default function App() {
           setIsDashboardOpen(false);
           setIsCartOpen(false);
           setIsWishlistOpen(false);
+        }}
+        onSearch={(term) => {
+          setSearchTerm(term);
+          setSelectedProductId(null);
+          setIsDashboardOpen(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
 
@@ -548,16 +561,18 @@ export default function App() {
             setSelectedProductId(null);
             setSearchTerm('');
             setIsDashboardOpen(false);
+          } else if (tab === 'categories') {
+            setIsDrawerOpen(true);
+          } else if (tab === 'orders') {
+            setIsCartOpen(true);
+            setIsWishlistOpen(false);
+            setIsDashboardOpen(false);
           } else if (tab === 'profile') {
             setIsDashboardOpen(true);
           } else if (tab === 'wishlist') {
             setIsWishlistOpen(true);
             setIsCartOpen(false);
             setIsDashboardOpen(false);
-          } else if (tab === 'search') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const searchInput = document.querySelector('input[placeholder="جستجو در متین‌کالا..."]') as HTMLInputElement;
-            searchInput?.focus();
           }
         }} 
         orderCount={cartItems.length}

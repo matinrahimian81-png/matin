@@ -44,7 +44,15 @@ export default function Header({
   user?: any;
   onProductClick?: (id: number) => void;
 }) {
-  const [menu, setMenu] = useState<MenuConfig>(DEFAULT_MENU_CONFIG);
+  const [menu, setMenu] = useState<MenuConfig>(() => {
+    const cached = typeof window !== 'undefined' ? localStorage.getItem('matinkala_menu_config') : null;
+    if (cached) {
+      try {
+        return normalizeMenuConfig(JSON.parse(cached));
+      } catch (e) {}
+    }
+    return normalizeMenuConfig(DEFAULT_MENU_CONFIG);
+  });
   const [activeL1Id, setActiveL1Id] = useState<string | null>(null);
   const [activeL2Id, setActiveL2Id] = useState<string | null>(null);
   const navRowRef = useRef<HTMLDivElement>(null);
